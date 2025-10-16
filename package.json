@@ -4,15 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx ts-node-dev --respawn index.ts",
+    "dev": "vite",
+    "server": "node --loader ts-node/esm --watch index.ts",
+    "start": "concurrently \"npm run server\" \"npm run dev\"",
     "vercel-build": "npx prisma migrate deploy",
     "postinstall": "prisma generate",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "server": "json-server --watch db.json --port 3001",
-    "start": "concurrently \"npm run server\" \"npm run dev\""
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@prisma/client": "^6.17.1",
     "lucide-react": "^0.546.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -23,6 +24,8 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
@@ -30,12 +33,15 @@
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.21",
     "concurrently": "^8.2.2",
+    "cors": "^2.8.5",
     "eslint": "^8.53.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
-    "json-server": "^0.17.4",
+    "express": "^4.21.2",
     "postcss": "^8.5.6",
+    "prisma": "^6.17.1",
     "tailwindcss": "^3.4.17",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.2.2",
     "vite": "^7.1.5"
   }
