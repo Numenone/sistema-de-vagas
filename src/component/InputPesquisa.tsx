@@ -23,7 +23,7 @@ export function InputPesquisa({ setVagas }: InputPesquisaProps) {
         }
 
         try {
-            const response = await fetch(`${apiUrl}/vagas?q=${data.termo}&ativa=true&_expand=empresa`);
+            const response = await fetch(`${apiUrl}/api/vagas?q=${data.termo}&ativa=true&_expand=empresa`);
             if (!response.ok) {
                 throw new Error('Falha na pesquisa.');
             }
@@ -40,7 +40,7 @@ export function InputPesquisa({ setVagas }: InputPesquisaProps) {
 
     async function mostraTodas() {
         try {
-            const response = await fetch(`${apiUrl}/vagas?ativa=true&_expand=empresa`);
+            const response = await fetch(`${apiUrl}/api/vagas?ativa=true&_expand=empresa`);
             if (!response.ok) {
                 throw new Error('Falha ao buscar vagas.');
             }

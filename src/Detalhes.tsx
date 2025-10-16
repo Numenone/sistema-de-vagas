@@ -21,7 +21,7 @@ export default function Detalhes() {
   useEffect(() => {
     async function buscaDados() {
       try {
-        const response = await fetch(`${apiUrl}/vagas/${params.vagaId}?_expand=empresa`)
+        const response = await fetch(`${apiUrl}/api/vagas/${params.vagaId}?_expand=empresa`)
         if (!response.ok) {
           throw new Error('Vaga não encontrada');
         }
@@ -43,7 +43,7 @@ export default function Detalhes() {
         console.log("Enviando candidatura para vaga ID:", params.vagaId);
         console.log("Usuário ID:", usuario.id);
         
-        const response = await fetch(`${apiUrl}/candidaturas`, {
+        const response = await fetch(`${apiUrl}/api/candidaturas`, {
             headers: {
                 "Content-Type": "application/json"
             },

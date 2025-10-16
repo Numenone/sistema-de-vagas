@@ -20,7 +20,7 @@ export default function Login() {
 
     async function verificaLogin(data: Inputs) {
         try {
-            const response = await fetch(`${apiUrl}/usuarios?email=${data.email}&senha=${data.senha}`)
+            const response = await fetch(`${apiUrl}/api/usuarios?email=${data.email}&senha=${data.senha}`)
             const usuarios = await response.json()
             
             if (usuarios.length > 0) {
@@ -88,7 +88,7 @@ export default function Login() {
                             Entrar
                         </button>
                         <p className="text-sm font-light text-gray-500">
-                            Ainda não possui conta? <a href="#" className="font-medium text-blue-600 hover:underline">Cadastre-se</a>
+                            Ainda não possui conta? <a href="/cadastro" className="font-medium text-blue-600 hover:underline">Cadastre-se</a>
                         </p>
                     </form>
                 </div>

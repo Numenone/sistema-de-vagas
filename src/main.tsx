@@ -13,6 +13,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Dashboard from './component/Dashboard.tsx';
 import GerenciarVagas from './component/GerenciarVagas.tsx';
 import GerenciarCandidaturas from './component/GerenciarCandidaturas.tsx';
+import GerenciarUsuarios from './component/GerenciarUsuarios.tsx';
 import AuthInitializer from './component/AuthInitializer.tsx';
 
 const rotas = createBrowserRouter([
@@ -32,6 +33,7 @@ const rotas = createBrowserRouter([
       { path: 'admin/dashboard', element: <Dashboard /> },
       { path: 'admin/vagas', element: <GerenciarVagas /> },
       { path: 'admin/candidaturas', element: <GerenciarCandidaturas /> },
+      { path: 'admin/usuarios', element: <GerenciarUsuarios /> },
     ],
   },
 ]);

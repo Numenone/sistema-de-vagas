@@ -19,7 +19,7 @@ export default function App() {
 
   const fetchVagas = async () => {
     try {
-      const response = await fetch(`${apiUrl}/vagas?ativa=true&_expand=empresa`);
+      const response = await fetch(`${apiUrl}/api/vagas?ativa=true&_expand=empresa`);
       if (!response.ok) {
         throw new Error('Falha ao carregar vagas.');
       }

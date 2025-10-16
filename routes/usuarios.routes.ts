@@ -7,14 +7,14 @@ import {
   deleteUsuario,
 } from '../controllers/usuarios.controller';
 import { validate } from '../middlewares/validate';
-import { createUsuarioSchema, updateUsuarioSchema } from '../schemas/usuario.schema';
+import { createUsuarioSchema, updateUsuarioSchema } from '../routes/usuario.schema';
 
 const usuariosRouter = Router();
 
 usuariosRouter.get('/', getAllUsuarios);
 usuariosRouter.get('/:id', getUsuarioById);
 usuariosRouter.post('/', validate(createUsuarioSchema), createUsuario);
-usuariosRouter.put('/:id', validate(createUsuarioSchema), updateUsuario); // PUT usa o schema de criação
+usuariosRouter.put('/:id', validate(createUsuarioSchema), updateUsuario);
 usuariosRouter.patch('/:id', validate(updateUsuarioSchema), updateUsuario);
 usuariosRouter.delete('/:id', deleteUsuario);
 

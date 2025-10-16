@@ -7,7 +7,7 @@ import {
   deleteEmpresa,
 } from '../controllers/empresas.controller';
 import { validate } from '../middlewares/validate';
-import { createEmpresaSchema, updateEmpresaSchema } from '../schemas/empresa.schema';
+import { createEmpresaSchema, updateEmpresaSchema } from '../routes/empresa.schema';
 
 const empresasRouter = Router();
 

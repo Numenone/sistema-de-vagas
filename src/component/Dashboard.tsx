@@ -120,10 +120,10 @@ export default function Dashboard() {
 
         const [vagasData, usuariosData, candidaturasData, empresasData] = 
           await Promise.all([
-            fetchData<VagaType[]>(`${apiUrl}/vagas?_expand=empresa`),
-            fetchData<UsuarioType[]>(`${apiUrl}/usuarios?tipo=candidato`),
-            fetchData<CandidaturaType[]>(`${apiUrl}/candidaturas`),
-            fetchData<EmpresaType[]>(`${apiUrl}/empresas`),
+            fetchData<VagaType[]>(`${apiUrl}/api/vagas?_expand=empresa`),
+            fetchData<UsuarioType[]>(`${apiUrl}/api/usuarios?tipo=candidato`),
+            fetchData<CandidaturaType[]>(`${apiUrl}/api/candidaturas`),
+            fetchData<EmpresaType[]>(`${apiUrl}/api/empresas`),
           ]);
         
         const vagasMap = new Map(vagasData.map(v => [v.id, v]));

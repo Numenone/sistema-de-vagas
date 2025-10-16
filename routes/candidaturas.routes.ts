@@ -19,4 +19,3 @@ candidaturasRouter.patch('/:id', validate(updateCandidaturaSchema), updateCandid
 candidaturasRouter.delete('/:id', deleteCandidatura);
 
 export default candidaturasRouter;
-

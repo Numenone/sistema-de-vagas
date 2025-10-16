@@ -49,6 +49,9 @@ export default function Titulo() {
                                             <Link to="/admin/candidaturas" className="text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-lg">
                                                 Candidaturas
                                             </Link>
+                                            <Link to="/admin/usuarios" className="text-white bg-yellow-600 hover:bg-yellow-700 px-3 py-2 rounded-lg">
+                                                Usuários
+                                            </Link>
                                         </>
                                     )}
                                     

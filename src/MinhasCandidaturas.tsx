@@ -25,7 +25,7 @@ export default function MinhasCandidaturas() {
 
                 console.log("🔄 Buscando candidaturas para usuário ID:", usuario.id);
                 
-                const responseCandidaturas = await fetch(`${apiUrl}/candidaturas?usuarioId=${usuario.id}`);
+                const responseCandidaturas = await fetch(`${apiUrl}/api/candidaturas?usuarioId=${usuario.id}`);
                 
                 if (!responseCandidaturas.ok) {
                     throw new Error(`Erro ao buscar candidaturas: ${responseCandidaturas.status}`);
@@ -43,7 +43,7 @@ export default function MinhasCandidaturas() {
                 const candidaturasCompletas = await Promise.all(
                     candidaturasData.map(async (candidatura: any) => {
                         try {
-                            const responseVaga = await fetch(`${apiUrl}/vagas/${candidatura.vagaId}?_expand=empresa`);
+                            const responseVaga = await fetch(`${apiUrl}/api/vagas/${candidatura.vagaId}?_expand=empresa`);
                             if (!responseVaga.ok) {
                                 console.error("Erro ao buscar vaga:", candidatura.vagaId);
                                 return {
