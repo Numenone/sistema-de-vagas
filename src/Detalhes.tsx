@@ -52,9 +52,7 @@ export default function Detalhes() {
                 usuarioId: usuario.id,
                 vagaId: Number(params.vagaId),
                 descricao: data.descricao,
-                status: "pendente",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                status: "pendente"
             })
         });
 

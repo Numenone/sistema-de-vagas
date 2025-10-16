@@ -7,10 +7,12 @@
     "dev": "vite",
     "server": "node --loader ts-node/esm --watch index.ts",
     "start": "concurrently \"npm run server\" \"npm run dev\"",
-    "vercel-build": "npx prisma migrate deploy && vite build",
-    "postinstall": "prisma generate",
-    "build": "tsc && vite build",
+    "seed": "node --loader ts-node/esm seed.ts",
+    "build": "prisma generate && prisma migrate deploy && prisma db seed && tsc && vite build",
     "preview": "vite preview"
+  },
+  "prisma": {
+    "seed": "node --loader ts-node/esm seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
