@@ -7,14 +7,10 @@
     "dev": "vite",
     "server": "node --loader ts-node/esm --watch index.ts",
     "start": "concurrently \"npm run server\" \"npm run dev\"",
-    "seed": "node --loader ts-node/esm seed.ts",
-    "vercel-build": "npx prisma migrate deploy",
+    "vercel-build": "npx prisma migrate deploy && vite build",
     "postinstall": "prisma generate",
     "build": "tsc && vite build",
     "preview": "vite preview"
-  },
-  "prisma": {
-    "seed": "node --loader ts-node/esm seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
@@ -24,9 +20,7 @@
     "react-hook-form": "^7.48.2",
     "react-router-dom": "^6.20.1",
     "sonner": "^1.4.29",
-    "supabase": "^2.51.0",
     "victory": "^37.3.6",
-    "zod": "^4.1.12",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
