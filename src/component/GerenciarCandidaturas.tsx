@@ -13,7 +13,8 @@ export default function GerenciarCandidaturas() {
 
   const fetchCandidaturas = async () => {
     try {
-      const response = await fetch(`${apiUrl}/candidaturas?_expand=vaga&_expand=usuario&_expand=empresa`);
+      // Usa o novo endpoint que já traz todos os dados relacionados
+      const response = await fetch(`${apiUrl}/api/candidaturas`);
       if (!response.ok) {
         throw new Error('Falha ao buscar candidaturas.');
       }
@@ -29,13 +30,11 @@ export default function GerenciarCandidaturas() {
 
   const atualizarStatus = async (candidaturaId: number, novoStatus: string) => {
     try {
-      const response = await fetch(`${apiUrl}/candidaturas/${candidaturaId}`, {
+      // Usa o novo endpoint para atualizar o status
+      const response = await fetch(`${apiUrl}/api/candidaturas/${candidaturaId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          status: novoStatus,
-          updatedAt: new Date().toISOString()
-        })
+        body: JSON.stringify({ status: novoStatus }) // O backend cuida do updatedAt
       });
       if (response.ok) {
         toast.success('Status atualizado!');
@@ -45,6 +44,7 @@ export default function GerenciarCandidaturas() {
       }
     } catch (error) {
       toast.error('Erro ao atualizar status');
+      console.error('Erro ao atualizar status:', error);
     }
   };
 
@@ -67,11 +67,11 @@ export default function GerenciarCandidaturas() {
             <tbody>
               {candidaturas.map(candidatura => (
                 <tr key={candidatura.id}>
-                  <td>
+                  <td className="align-top">
                     <div className="font-bold">{candidatura.vaga.titulo}</div>
                     <div className="text-sm text-gray-600">{candidatura.vaga.empresa.nome}</div>
                   </td>
-                  <td>
+                  <td className="align-top">
                     <div>{candidatura.usuario.nome}</div>
                     <div className="text-sm text-gray-600">{candidatura.usuario.email}</div>
                   </td>
@@ -86,12 +86,15 @@ export default function GerenciarCandidaturas() {
                       {candidatura.status}
                     </span>
                   </td>
-                  <td>
+                  <td className="align-top">
                     <div className="flex flex-col gap-2">
-                      <button onClick={() => atualizarStatus(candidatura.id, 'aprovada')} className="btn-primary text-xs">
+                      <button onClick={() => atualizarStatus(candidatura.id, 'visualizada')} className="btn-secondary text-xs">
+                        Visualizar
+                      </button>
+                      <button onClick={() => atualizarStatus(candidatura.id, 'aprovada')} className="btn-success text-xs">
                         Aprovar
                       </button>
-                      <button onClick={() => atualizarStatus(candidatura.id, 'rejeitada')} className="btn-secondary text-xs">
+                      <button onClick={() => atualizarStatus(candidatura.id, 'rejeitada')} className="btn-danger text-xs">
                         Rejeitar
                       </button>
                     </div>

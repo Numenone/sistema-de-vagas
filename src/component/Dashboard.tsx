@@ -14,11 +14,13 @@ import {
   ClipboardList
 } from 'lucide-react'; 
 import {
-  type ChartData, type ChartType, type TimelineItem, type PieChartData,
+  type ChartData, type TimelineItem, type PieChartData,
   processVagasPorEmpresa, processCandidaturasPorStatus,
   processVagasPorSalario, processTopVagas, processTimeline,
   formatTimelineDate
 } from '../utils/dashboard.utils';
+
+type ChartType = 'empresa' | 'status' | 'salario' | 'topVagas';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -31,22 +33,22 @@ const customTheme = {
   ...VictoryTheme.material,
   pie: {
     ...VictoryTheme.material.pie,
-    colorScale: chartColors,
+    colorScale: chartColors as any, // Cast to any to satisfy type checking
     style: {
       ...VictoryTheme.material.pie?.style,
       labels: {
         ...VictoryTheme.material.pie?.style?.labels,
         fontSize: 14,
         fill: 'white',
-        fontWeight: 'bold',
-        stroke: 'rgba(0,0,0,0.2)',
-        strokeWidth: 1,
+        fontWeight: 'bold' as any, // Cast to any
+        stroke: 'rgba(0,0,0,0.2)' as any, // Cast to any
+        strokeWidth: 1 as any, // Cast to any
       },
     },
   },
   legend: {
     ...VictoryTheme.material.legend,
-    colorScale: chartColors,
+    colorScale: chartColors as any, // Cast to any
     style: {
       ...VictoryTheme.material.legend?.style,
       labels: { 
@@ -60,7 +62,7 @@ const customTheme = {
   bar: {
     ...VictoryTheme.material.bar,
     barWidth: 25,
-    style: {
+      style: { // Cast to any
       ...VictoryTheme.material.bar?.style,
       data: { fill: chartColors[0] },
       labels: { fontSize: 14, fill: 'black', fontWeight: 'bold' },
@@ -93,21 +95,19 @@ export default function Dashboard() {
         setLoading(true);
         setError(null);
 
-        // This assumes you have created the new backend endpoint
+        // Requisição única para o novo endpoint otimizado do backend
         const response = await fetch(`${apiUrl}/api/dashboard-stats`);
         if (!response.ok) throw new Error('Falha ao buscar dados do dashboard.');
         const { stats: fetchedStats, vagas, candidaturas } = await response.json();
 
-        // Processamento para os cards de estatísticas
+        // 1. Usa as estatísticas já calculadas pelo backend
         setStats(fetchedStats);
 
-        // Processamento para os gráficos
+        // 2. Processa os dados brutos para os gráficos no frontend
         const porEmpresa = processVagasPorEmpresa(vagas);
         const porStatus = processCandidaturasPorStatus(candidaturas);
         const porSalario = processVagasPorSalario(vagas);
         const topVagasData = processTopVagas(candidaturas, vagas);
-        
-        // Pass only recent data to timeline to improve performance
         const timelineItems = processTimeline(vagas, candidaturas);
 
         setTimelineItems(timelineItems);
@@ -120,12 +120,9 @@ export default function Dashboard() {
       }
     }
 
-    if (usuario.tipo === 'admin') {
-      fetchStats();
-    } else {
-      setLoading(false);
-    }
-  }, [usuario.tipo]);
+    // A rota já é protegida, então não precisamos verificar o tipo de usuário aqui.
+    fetchStats();
+  }, []);
 
   const currentChart = useMemo(() => {
     switch (activeChart) {
@@ -157,10 +154,6 @@ export default function Dashboard() {
         return { data: [], title: '', colorScale: 'grayscale' };
     }
   }, [activeChart, chartData]);
-
-  if (usuario.tipo !== 'admin') {
-    return <div>Acesso restrito a administradores</div>;
-  }
 
   if (loading || error) {
     return (
@@ -277,7 +270,7 @@ const ChartsDisplay: FC<{ activeChart: ChartType; setActiveChart: (chart: ChartT
             theme={customTheme} 
             // Mostra o valor apenas se a fatia for maior que 5% do total
             labels={({ datum, data }) => {
-              const total = data.reduce((acc, d) => acc + d.y, 0);
+                const total: number = (data as PieChartData[]).reduce((acc: number, d: PieChartData) => acc + d.y, 0);
               return (datum.y / total) > 0.05 ? datum.y : '';
             }} 
           />

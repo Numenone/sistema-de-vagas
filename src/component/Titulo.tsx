@@ -3,6 +3,8 @@ import { useUsuarioStore } from "../context/UsuarioContext"
 import { useNavigate } from "react-router-dom"
 import React from 'react'
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export default function Titulo() {
     const { usuario, deslogaUsuario } = useUsuarioStore()
     const navigate = useNavigate()
@@ -28,16 +30,41 @@ export default function Titulo() {
                         <li>
                             {usuario.id ? (
                                 <div className="flex items-center gap-4">
-                                    <span className="text-white">
-                                        {usuario.nome} ({usuario.tipo})
-                                    </span>
+                                    <img 
+                                        src={usuario.fotoPerfil ? `${apiUrl}${usuario.fotoPerfil}` : `https://ui-avatars.com/api/?name=${usuario.nome}&background=random`} 
+                                        alt="Foto de perfil"
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
+                                    <div>
+                                        <span className="text-white font-bold">{usuario.nome}</span>
+                                        <div className="text-xs text-gray-300">{usuario.tipo}</div>
+                                    </div>
+                                    <Link to="/perfil/editar" className="text-white hover:text-blue-200 text-sm underline">
+                                        Editar Perfil
+                                    </Link>
                                     
                                     {usuario.tipo === 'candidato' && (
-                                        <Link to="/minhasCandidaturas" className="text-white bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded-lg">
-                                            Minhas Candidaturas
-                                        </Link>
+                                        <>
+                                            <Link to="/minhasCandidaturas" className="text-white bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded-lg">
+                                                Minhas Candidaturas
+                                            </Link>
+                                            <Link to="/favoritos" className="text-white bg-pink-600 hover:bg-pink-700 px-3 py-2 rounded-lg">
+                                                Favoritos
+                                            </Link>
+                                        </>
                                     )}
                                     
+                                    {usuario.tipo === 'lider' && (
+                                        <>
+                                            <Link to="/empresa/editar" className="text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg">
+                                                Editar Empresa
+                                            </Link>
+                                            <Link to="/empresa/vagas" className="text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg">
+                                                Gerenciar Vagas
+                                            </Link>
+                                        </>
+                                    )}
+
                                     {usuario.tipo === 'admin' && (
                                         <>
                                             <Link to="/admin/dashboard" className="text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg">
@@ -48,9 +75,6 @@ export default function Titulo() {
                                             </Link>
                                             <Link to="/admin/candidaturas" className="text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-lg">
                                                 Candidaturas
-                                            </Link>
-                                            <Link to="/admin/usuarios" className="text-white bg-yellow-600 hover:bg-yellow-700 px-3 py-2 rounded-lg">
-                                                Usuários
                                             </Link>
                                         </>
                                     )}

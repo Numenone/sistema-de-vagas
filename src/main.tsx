@@ -5,17 +5,23 @@ import React from 'react'
 
 import App from './App.tsx'
 import Login from './Login.tsx'
-import Cadastro from './Cadastro.tsx'
 import Detalhes from './Detalhes.tsx'
 import MinhasCandidaturas from './MinhasCandidaturas.tsx'
+import Cadastro from './Cadastro.tsx'
+import EditarPerfil from './EditarPerfil.tsx' // This line already exists and is correct.
+import MinhasVagas from './MinhasVagas.tsx'
+import EsqueciSenha from './EsqueciSenha.tsx'
+import EmpresaPerfil from './EmpresaPerfil.tsx'
+import MinhasVagasFavoritas from './MinhasVagasFavoritas.tsx'
+import RedefinirSenha from './RedefinirSenha.tsx'
 
 import Layout from './Layout.tsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Dashboard from './component/Dashboard.tsx';
 import GerenciarVagas from './component/GerenciarVagas.tsx';
 import GerenciarCandidaturas from './component/GerenciarCandidaturas.tsx';
-import GerenciarUsuarios from './component/GerenciarUsuarios.tsx';
 import AuthInitializer from './component/AuthInitializer.tsx';
+import AdminProtectedRoute from './component/AdminProtectedRoute.tsx';
 
 const rotas = createBrowserRouter([
   {
@@ -31,11 +37,19 @@ const rotas = createBrowserRouter([
       { path: 'login', element: <Login /> },
       { path: 'cadastro', element: <Cadastro /> },
       { path: 'detalhes/:vagaId', element: <Detalhes /> },
+      { path: 'esqueci-senha', element: <EsqueciSenha /> },
+      { path: 'redefinir-senha', element: <RedefinirSenha /> },
+      { path: 'empresas/:id', element: <EmpresaPerfil /> },
+      { path: 'empresa/vagas', element: <MinhasVagas /> },
+      { path: 'perfil/editar', element: <EditarPerfil /> },
+      { path: 'favoritos', element: <MinhasVagasFavoritas /> },
       { path: 'minhasCandidaturas', element: <MinhasCandidaturas /> },
-      { path: 'admin/dashboard', element: <Dashboard /> },
-      { path: 'admin/vagas', element: <GerenciarVagas /> },
-      { path: 'admin/candidaturas', element: <GerenciarCandidaturas /> },
-      { path: 'admin/usuarios', element: <GerenciarUsuarios /> },
+      // Agrupando as rotas de admin sob a proteção
+      { element: <AdminProtectedRoute />, children: [
+          { path: 'admin/dashboard', element: <Dashboard /> },
+          { path: 'admin/vagas', element: <GerenciarVagas /> },
+          { path: 'admin/candidaturas', element: <GerenciarCandidaturas /> },
+      ]}
     ],
   },
 ]);

@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form"
 import { useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
 import { useUsuarioStore } from "./context/UsuarioContext"
-import React from 'react'
 
 type Inputs = {
     email: string
@@ -13,35 +12,44 @@ type Inputs = {
 const apiUrl = import.meta.env.VITE_API_URL
 
 export default function Login() {
-    const { register, handleSubmit } = useForm<Inputs>()    
-    const { logaUsuario } = useUsuarioStore()
-
-    const navigate = useNavigate()
-
+    const { register, handleSubmit } = useForm<Inputs>();
+    const navigate = useNavigate();
+    const { logaUsuario, fetchFavoritos } = useUsuarioStore();
     async function verificaLogin(data: Inputs) {
         try {
-            const response = await fetch(`${apiUrl}/api/usuarios/login`, {
+            // 1. Alterado para uma requisição POST com os dados no corpo (body)
+            const response = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     email: data.email,
-                    senha: data.senha
-                })
+                    senha: data.senha,
+                }),
             });
 
+            // 2. Tratamento de resposta baseado no status HTTP
             if (response.ok) {
-                const usuario = await response.json();
-                logaUsuario(usuario, data.manter);
-                
+                const { token, usuario } = await response.json();
+                // O backend não deve retornar a senha.
+                // Se retornar, é uma boa prática removê-la aqui.
+                // delete usuario.senha; // A senha não deve ser retornada pelo backend
+                logaUsuario({ ...usuario, token });
+                if (usuario.tipo === 'candidato') {
+                    fetchFavoritos(); // Busca os favoritos após o login
+                }
                 navigate("/")
+            } else if (response.status === 401) {
+                // 401 Unauthorized: Credenciais inválidas
+                toast.error("Erro... Email ou senha incorretos");
             } else {
-                toast.error("Erro... Email ou senha incorretos")
+                // Outros erros do servidor
+                toast.error("Ocorreu um erro no servidor. Tente novamente.");
             }
         } catch (error) {
             console.error("Erro no login:", error)
-            toast.error("Erro de conexão")
+            toast.error("Falha na conexão com o servidor. Verifique sua internet.");
         }
     }
 
@@ -88,6 +96,9 @@ export default function Login() {
                                     <label htmlFor="remember" className="text-gray-500">Manter Conectado</label>
                                 </div>
                             </div>
+                            <Link to="/esqueci-senha" className="text-sm font-medium text-blue-600 hover:underline">
+                                Esqueci minha senha
+                            </Link>
                         </div>
                         <button 
                             type="submit" 

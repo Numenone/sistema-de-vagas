@@ -1,63 +1,30 @@
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type { VagaType } from "../utils/VagaType";
 import React from 'react'
-
-const apiUrl = import.meta.env.VITE_API_URL;
 
 type Inputs = {
     termo: string;
 }
 
 type InputPesquisaProps = {
-    setVagas: React.Dispatch<React.SetStateAction<VagaType[]>>;
+    onSearch: (termo: string) => void; // Chamado no submit
+    onInputChange: (termo: string) => void; // Chamado no onChange
 }
 
-export function InputPesquisa({ setVagas }: InputPesquisaProps) {
+export function InputPesquisa({ onSearch, onInputChange }: InputPesquisaProps) {
     const { register, handleSubmit, reset } = useForm<Inputs>();
 
     async function enviaPesquisa(data: Inputs) {
-        if (data.termo.length < 2) {
-            toast.error("Informe, no mínimo, 2 caracteres");
-            return;
-        }
-
-        try {
-            const response = await fetch(`${apiUrl}/api/vagas?q=${data.termo}&ativa=true&_expand=empresa`);
-            if (!response.ok) {
-                throw new Error('Falha na pesquisa.');
-            }
-            const dados = await response.json();
-            if (Array.isArray(dados)) {
-                setVagas(dados);
-            }
-            toast.success(`${dados.length} vaga(s) encontrada(s)`);
-        } catch (error) {
-            console.error("Erro na pesquisa:", error);
-            toast.error("Erro ao pesquisar vagas");
-        }
+        onSearch(data.termo);
     }
 
     async function mostraTodas() {
-        try {
-            const response = await fetch(`${apiUrl}/api/vagas?ativa=true&_expand=empresa`);
-            if (!response.ok) {
-                throw new Error('Falha ao buscar vagas.');
-            }
-            const dados = await response.json();
-            reset({ termo: "" });
-            if (Array.isArray(dados)) {
-                setVagas(dados);
-            }
-            toast.success("Mostrando todas as vagas");
-        } catch (error) {
-            console.error("Erro ao buscar vagas:", error);
-        }
+        reset({ termo: "" });
+        onInputChange(""); // Limpa o filtro no App.tsx
     }
 
     return (
         <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleSubmit(enviaPesquisa)} className="mb-4">
+            <form id="form-pesquisa" onSubmit={handleSubmit(enviaPesquisa)} className="mb-4">
                 <label htmlFor="default-search" className="mb-2 text-sm font-medium text-white sr-only">
                     Pesquisar vagas
                 </label>
@@ -72,8 +39,9 @@ export function InputPesquisa({ setVagas }: InputPesquisaProps) {
                         id="default-search" 
                         className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Pesquisar por título da vaga, empresa ou tecnologia..." 
-                        required 
-                        {...register('termo')} 
+                        {...register('termo', {
+                            onChange: (e) => onInputChange(e.target.value)
+                        })} 
                     />
                     <button 
                         type="submit" 

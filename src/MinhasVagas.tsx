@@ -1,11 +1,9 @@
-/// <reference types="vite/client" />
-
 import { useEffect, useState } from 'react';
-import { useForm, UseFormRegister, UseFormHandleSubmit, UseFormReset } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import type { VagaType } from '../utils/VagaType';
-import type { EmpresaType } from '../utils/EmpresaType';
-import { useUsuarioStore } from '../context/UsuarioContext';
+import type { VagaType } from './utils/VagaType';
+import { useUsuarioStore } from './context/UsuarioContext';
+import { useNavigate } from 'react-router-dom';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -14,57 +12,44 @@ type Inputs = {
   descricao: string;
   requisitos: string;
   salario: number;
-  empresaId: number;
   modalidade: string;
   tipoContrato: string;
 };
 
-export default function GerenciarVagas() {
+export default function MinhasVagas() {
   const [vagas, setVagas] = useState<VagaType[]>([]);
-  const [empresas, setEmpresas] = useState<EmpresaType[]>([]);
-  const { register, handleSubmit, reset } = useForm<Inputs>(); // Removed fetchAutenticado from here
-  const { fetchAutenticado } = useUsuarioStore(); // Correctly get fetchAutenticado from useUsuarioStore
-
-  useEffect(() => {
-    fetchVagas();
-    fetchEmpresas();
-  }, []);
+  const { usuario } = useUsuarioStore();
+  const { fetchAutenticado } = useUsuarioStore();
+  const { register, handleSubmit, reset } = useForm<Inputs>();
+  const navigate = useNavigate();
 
   const fetchVagas = async () => {
+    if (!usuario?.empresaId) return;
     try {
-      // Usa o novo endpoint, pedindo todas as vagas (ativas e inativas)
-      const response = await fetchAutenticado(`${apiUrl}/api/vagas?status=all`);
+      const response = await fetchAutenticado(`${apiUrl}/api/vagas?empresaId=${usuario.empresaId}&status=all`);
       if (!response.ok) throw new Error('Falha ao buscar vagas.');
-      const dados = await response.json(); // A resposta agora é um objeto com { vagas, ... }
-      if (Array.isArray(dados.vagas)) {
-        setVagas(dados.vagas);
-      }
+      const dados = await response.json();
+      // Ajuste para o novo formato de resposta
+      setVagas(dados.vagas ?? dados ?? []);
     } catch (error) {
-      console.error('Erro ao buscar vagas:', error);
       toast.error('Erro ao carregar vagas.');
     }
   };
 
-  const fetchEmpresas = async () => {
-    try {
-      // Usa o novo endpoint para buscar empresas
-      const response = await fetchAutenticado(`${apiUrl}/api/empresas`);
-      if (!response.ok) throw new Error('Falha ao buscar empresas.');
-      const dados = await response.json();
-      if (Array.isArray(dados)) {
-        setEmpresas(dados);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar empresas:', error);
+  useEffect(() => {
+    if (usuario.tipo !== 'lider' || !usuario.empresaId) {
+      toast.error('Acesso não autorizado.');
+      navigate('/');
+    } else {
+      fetchVagas();
     }
-  };
+  }, [usuario, navigate]);
 
   const onSubmit = async (data: Inputs) => {
     try {
-      // Usa o novo endpoint para criar vagas
       const response = await fetchAutenticado(`${apiUrl}/api/vagas`, {
         method: 'POST',
-        body: JSON.stringify(data) // O backend agora cuida da lógica
+        body: JSON.stringify(data),
       });
 
       if (response.ok) {
@@ -73,7 +58,7 @@ export default function GerenciarVagas() {
         fetchVagas();
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || 'Erro ao criar vaga');
+        toast.error(errorData?.message || 'Erro ao criar vaga');
       }
     } catch (error) {
       toast.error('Erro ao criar vaga');
@@ -82,33 +67,36 @@ export default function GerenciarVagas() {
 
   const toggleVagaStatus = async (vaga: VagaType) => {
     try {
-      // Usa o novo endpoint para atualizar vagas
       const response = await fetchAutenticado(`${apiUrl}/api/vagas/${vaga.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ ativa: !vaga.ativa })
+        body: JSON.stringify({ ativa: !vaga.ativa }),
       });
-      if (response.ok) {
-        fetchVagas();
-        toast.success(`Vaga ${!vaga.ativa ? 'ativada' : 'desativada'} com sucesso!`);
-      } else {
-        throw new Error('Falha ao alterar status.');
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => null);
+        throw new Error(err?.message || 'Falha ao alterar status.');
       }
+
+      // Atualiza o estado local para refletir a mudança imediatamente
+      setVagas(prev => prev.map(v => (v.id === vaga.id ? { ...v, ativa: !v.ativa } : v)));
+      toast.success('Status da vaga atualizado.');
     } catch (error) {
       console.error('Erro ao alterar status da vaga:', error);
+      toast.error('Erro ao alterar status da vaga');
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Gerenciar Vagas</h1>
+      <h1 className="text-3xl font-bold mb-8">Gerenciar Vagas da Empresa</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="card mb-8">
-        <h2 className="text-xl font-bold mb-4">Nova Vaga</h2>
+        <h2 className="text-xl font-bold mb-4">Criar Nova Vaga</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <input {...register('titulo')} placeholder="Título" className="form-input" required />
+          <input {...register('titulo')} placeholder="Título da Vaga" className="form-input" required />
           <input {...register('salario')} type="number" placeholder="Salário" className="form-input" required />
         </div>
-        <textarea {...register('descricao')} placeholder="Descrição" className="form-input mb-4" rows={3} required />
+        <textarea {...register('descricao')} placeholder="Descrição da Vaga" className="form-input mb-4" rows={3} required />
         <textarea {...register('requisitos')} placeholder="Requisitos" className="form-input mb-4" rows={2} required />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <select {...register('modalidade')} className="form-input" required>
@@ -123,33 +111,18 @@ export default function GerenciarVagas() {
             <option value="PJ">PJ</option>
           </select>
         </div>
-        <select {...register('empresaId')} className="form-input mb-4" required>
-          <option value="">Selecione a empresa</option>
-          {empresas.map(empresa => (
-            <option key={empresa.id} value={empresa.id}>{empresa.nome}</option>
-          ))}
-        </select>
         <button type="submit" className="btn-primary">Criar Vaga</button>
       </form>
 
       <div className="card">
-        <h2 className="text-xl font-bold mb-4">Vagas Cadastradas</h2>
+        <h2 className="text-xl font-bold mb-4">Minhas Vagas Cadastradas</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Empresa</th>
-                <th>Salário</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
+            {/* ... cabeçalho da tabela ... */}
             <tbody>
               {vagas.map(vaga => (
                 <tr key={vaga.id}>
                   <td>{vaga.titulo}</td>
-                  <td>{vaga.empresa?.nome}</td>
                   <td>R$ {vaga.salario.toLocaleString('pt-BR')}</td>
                   <td>
                     <span className={`px-2 py-1 rounded ${vaga.ativa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

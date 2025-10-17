@@ -1,6 +1,5 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useUsuarioStore } from './context/UsuarioContext';
 
@@ -14,10 +13,9 @@ type Inputs = {
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function Cadastro() {
-  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>();
-  const { logaUsuario } = useUsuarioStore();
+  const { register, handleSubmit } = useForm<Inputs>();
+  const { logaUsuario, fetchFavoritos } = useUsuarioStore();
   const navigate = useNavigate();
-
   async function onSubmit(data: Inputs) {
     if (data.senha !== data.confirmarSenha) {
       toast.error('As senhas não coincidem.');
@@ -39,23 +37,32 @@ export default function Cadastro() {
       });
 
       if (response.status === 201) {
-        const novoUsuario = await response.json();
-        toast.success('Cadastro realizado com sucesso! Você será redirecionado.');
-        // Loga o usuário e o redireciona
-        logaUsuario(novoUsuario, true);
-        setTimeout(() => navigate('/'), 2000);
+        const loginResponse = await fetch(`${apiUrl}/login`, { // A rota de login está na raiz
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: data.email, senha: data.senha }),
+        });
+
+        if (loginResponse.ok) {
+          toast.success('Cadastro realizado com sucesso! Você será redirecionado.');
+          const { token, usuario } = await loginResponse.json();
+          logaUsuario(usuario, token, true); // Manter conectado por padrão
+          if (usuario.tipo === 'candidato') {
+            fetchFavoritos();
+          }
+          navigate('/');
+        } else {
+          throw new Error('Falha ao fazer login após o cadastro.');
+        }
       } else {
-        const errorData = await response.json();
-        // Verifica se o erro é de email duplicado
-        if (errorData.error?.toLowerCase().includes('unique constraint failed')) {
+        if (response.status === 409) {
           toast.error('Este e-mail já está em uso.');
         } else {
           toast.error('Erro ao realizar o cadastro. Tente novamente.');
         }
       }
     } catch (error) {
-      console.error("Erro no cadastro:", error);
-      toast.error("Erro de conexão. Tente novamente mais tarde.");
+      toast.error('Erro inesperado. Tente novamente.');
     }
   }
 
@@ -85,7 +92,7 @@ export default function Cadastro() {
               Cadastrar
             </button>
             <p className="text-sm font-light text-gray-500">
-              Já possui uma conta? <a href="/login" className="font-medium text-blue-600 hover:underline">Faça login</a>
+              Já possui uma conta? <Link to="/login" className="font-medium text-blue-600 hover:underline">Faça login</Link>
             </p>
           </form>
         </div>

@@ -8,6 +8,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 export default function MinhasCandidaturas() {
     const [candidaturas, setCandidaturas] = useState<CandidaturaType[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filtroStatus, setFiltroStatus] = useState('todas');
     const [error, setError] = useState<string | null>(null);
     const { usuario } = useUsuarioStore();
 
@@ -25,49 +26,16 @@ export default function MinhasCandidaturas() {
 
                 console.log("🔄 Buscando candidaturas para usuário ID:", usuario.id);
                 
-                const responseCandidaturas = await fetch(`${apiUrl}/api/candidaturas?usuarioId=${usuario.id}`);
+                // Requisição única para o novo endpoint otimizado
+                const response = await fetch(`${apiUrl}/api/candidaturas/usuario/${usuario.id}?status=${filtroStatus}`);
                 
-                if (!responseCandidaturas.ok) {
-                    throw new Error(`Erro ao buscar candidaturas: ${responseCandidaturas.status}`);
+                if (!response.ok) {
+                    throw new Error(`Erro ao buscar candidaturas: ${response.status}`);
                 }
                 
-                const candidaturasData = await responseCandidaturas.json();
-                console.log("📋 Candidaturas encontradas:", candidaturasData);
+                const candidaturasCompletas = await response.json();
+                console.log("✅ Candidaturas completas recebidas:", candidaturasCompletas);
 
-                if (candidaturasData.length === 0) {
-                    setCandidaturas([]);
-                    setLoading(false);
-                    return;
-                }
-
-                const candidaturasCompletas = await Promise.all(
-                    candidaturasData.map(async (candidatura: any) => {
-                        try {
-                            const responseVaga = await fetch(`${apiUrl}/api/vagas/${candidatura.vagaId}?_expand=empresa`);
-                            if (!responseVaga.ok) {
-                                console.error("Erro ao buscar vaga:", candidatura.vagaId);
-                                return {
-                                    ...candidatura,
-                                    vaga: { titulo: "Vaga não encontrada", empresa: { nome: "N/A" } }
-                                };
-                            }
-                            const vagaData = await responseVaga.json();
-
-                            return {
-                                ...candidatura,
-                                vaga: vagaData
-                            };
-                        } catch (error) {
-                            console.error("Erro ao processar candidatura:", candidatura.id, error);
-                            return {
-                                ...candidatura,
-                                vaga: { titulo: "Erro ao carregar", empresa: { nome: "N/A" } }
-                            };
-                        }
-                    })
-                );
-
-                console.log("✅ Candidaturas completas:", candidaturasCompletas);
                 setCandidaturas(candidaturasCompletas);
                 
             } catch (error) {
@@ -79,7 +47,7 @@ export default function MinhasCandidaturas() {
         }
 
         buscaCandidaturas();
-    }, [usuario.id]);
+    }, [usuario.id, filtroStatus]);
 
     function formatarData(data: string) {
         try {
@@ -160,6 +128,24 @@ export default function MinhasCandidaturas() {
             <h1 className="mb-6 text-3xl font-extrabold leading-none tracking-tight text-gray-900">
                 Minhas <span className="underline underline-offset-3 decoration-8 decoration-orange-400">Candidaturas</span>
             </h1>
+
+            <div className="mb-6 flex flex-wrap gap-2">
+                <button onClick={() => setFiltroStatus('todas')} className={`btn ${filtroStatus === 'todas' ? 'btn-primary' : 'btn-secondary'}`}>
+                    Todas
+                </button>
+                <button onClick={() => setFiltroStatus('pendente')} className={`btn ${filtroStatus === 'pendente' ? 'btn-primary' : 'btn-secondary'}`}>
+                    Pendentes
+                </button>
+                <button onClick={() => setFiltroStatus('visualizada')} className={`btn ${filtroStatus === 'visualizada' ? 'btn-primary' : 'btn-secondary'}`}>
+                    Visualizadas
+                </button>
+                <button onClick={() => setFiltroStatus('aprovada')} className={`btn ${filtroStatus === 'aprovada' ? 'btn-primary' : 'btn-secondary'}`}>
+                    Aprovadas
+                </button>
+                <button onClick={() => setFiltroStatus('rejeitada')} className={`btn ${filtroStatus === 'rejeitada' ? 'btn-primary' : 'btn-secondary'}`}>
+                    Rejeitadas
+                </button>
+            </div>
 
             {candidaturas.length === 0 ? (
                 <div className="text-center py-12">

@@ -1,4 +1,6 @@
 export type UsuarioType = {
+    fotoPerfil: any
+    fotoPerfil: any
     id: number
     nome: string
     email: string
