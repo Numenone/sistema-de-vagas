@@ -5,14 +5,16 @@ import {
   createUsuario,
   updateUsuario,
   deleteUsuario,
-} from '../controllers/usuarios.controller';
-import { validate } from '../middlewares/validate';
-import { createUsuarioSchema, updateUsuarioSchema } from '../routes/usuario.schema';
+  loginUsuario,
+} from '../controllers/usuarios.controller.ts';
+import { validate } from '../middlewares/validate.ts';
+import { createUsuarioSchema, updateUsuarioSchema } from '../schemas/usuario.schema.ts';
 
 const usuariosRouter = Router();
 
 usuariosRouter.get('/', getAllUsuarios);
 usuariosRouter.get('/:id', getUsuarioById);
+usuariosRouter.post('/login', loginUsuario); // Nova rota para login
 usuariosRouter.post('/', validate(createUsuarioSchema), createUsuario);
 usuariosRouter.put('/:id', validate(createUsuarioSchema), updateUsuario);
 usuariosRouter.patch('/:id', validate(updateUsuarioSchema), updateUsuario);

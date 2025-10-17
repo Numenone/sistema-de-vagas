@@ -10,7 +10,7 @@ export const errorHandler = (
   console.error(err);
 
   if (err instanceof ZodError) {
-    return res.status(400).json({ errors: err.errors });
+    return res.status(400).json({ errors: err.issues });
   }
 
   return res.status(500).json({ error: 'Ocorreu um erro interno no servidor.' });

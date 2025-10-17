@@ -5,9 +5,9 @@ import {
   createEmpresa,
   updateEmpresa,
   deleteEmpresa,
-} from '../controllers/empresas.controller';
-import { validate } from '../middlewares/validate';
-import { createEmpresaSchema, updateEmpresaSchema } from '../routes/empresa.schema';
+} from '../controllers/empresas.controller.ts';
+import { validate } from '../middlewares/validate.ts';
+import { createEmpresaSchema, updateEmpresaSchema } from '../schemas/empresa.schema.ts';
 
 const empresasRouter = Router();
 

@@ -5,9 +5,9 @@ import {
   createCandidatura,
   updateCandidatura,
   deleteCandidatura,
-} from '../controllers/candidaturas.controller';
-import { validate } from '../middlewares/validate';
-import { createCandidaturaSchema, updateCandidaturaSchema } from '../schemas/candidatura.schema';
+} from '../controllers/candidaturas.controller.ts';
+import { validate } from '../middlewares/validate.ts';
+import { createCandidaturaSchema, updateCandidaturaSchema } from '../schemas/candidatura.schema.ts';
 
 const candidaturasRouter = Router();
 

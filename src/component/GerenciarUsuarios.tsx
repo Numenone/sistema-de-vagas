@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { UsuarioType } from '../utils/UsuarioType';
+import { useUsuarioStore } from '../context/UsuarioContext';
 import { ShieldCheck, User, UserCog } from 'lucide-react';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
+// Define user roles for better type safety and reusability.
+const USER_ROLES = ['candidato', 'lider', 'admin'] as const;
+type UserRole = typeof USER_ROLES[number];
+
 export default function GerenciarUsuarios() {
   const [usuarios, setUsuarios] = useState<UsuarioType[]>([]);
   const [loading, setLoading] = useState(true);
+  const { usuario: adminUsuario } = useUsuarioStore();
 
   async function fetchUsuarios() {
     try {
@@ -28,7 +34,12 @@ export default function GerenciarUsuarios() {
     fetchUsuarios();
   }, []);
 
-  async function handleRoleChange(userId: number, newRole: string) {
+  async function handleRoleChange(userId: number, newRole: UserRole) {
+    if (userId === adminUsuario.id) {
+      toast.warning('Você não pode alterar sua própria permissão.');
+      return;
+    }
+
     if (!confirm(`Deseja alterar a permissão deste usuário para "${newRole}"?`)) {
       return;
     }
@@ -37,7 +48,7 @@ export default function GerenciarUsuarios() {
       const response = await fetch(`${apiUrl}/api/usuarios/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo: newRole }),
+        body: JSON.stringify({ tipo: newRole as string }),
       });
 
       if (!response.ok) throw new Error('Falha ao atualizar permissão.');
@@ -55,7 +66,7 @@ export default function GerenciarUsuarios() {
     }
   }
 
-  const roleIcons: Record<string, React.ElementType> = {
+  const roleIcons: Record<UserRole, React.ElementType> = {
     candidato: User,
     lider: UserCog,
     admin: ShieldCheck,
@@ -92,12 +103,13 @@ export default function GerenciarUsuarios() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <select
                       value={user.tipo}
-                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                      onChange={(e) => handleRoleChange(user.id, e.target.value as UserRole)}
                       className="form-input py-1"
+                      disabled={user.id === adminUsuario.id} // Disable changing own role
                     >
-                      <option value="candidato">Candidato</option>
-                      <option value="lider">Líder</option>
-                      <option value="admin">Admin</option>
+                      {USER_ROLES.map(role => (
+                        <option key={role} value={role}>{role.charAt(0).toUpperCase() + role.slice(1)}</option>
+                      ))}
                     </select>
                   </td>
                 </tr>

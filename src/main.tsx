@@ -5,6 +5,7 @@ import React from 'react'
 
 import App from './App.tsx'
 import Login from './Login.tsx'
+import Cadastro from './Cadastro.tsx'
 import Detalhes from './Detalhes.tsx'
 import MinhasCandidaturas from './MinhasCandidaturas.tsx'
 
@@ -28,6 +29,7 @@ const rotas = createBrowserRouter([
     children: [
       { index: true, element: <App /> },
       { path: 'login', element: <Login /> },
+      { path: 'cadastro', element: <Cadastro /> },
       { path: 'detalhes/:vagaId', element: <Detalhes /> },
       { path: 'minhasCandidaturas', element: <MinhasCandidaturas /> },
       { path: 'admin/dashboard', element: <Dashboard /> },

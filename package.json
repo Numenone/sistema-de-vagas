@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "node --loader ts-node/esm --watch index.ts",
+    "server": "node --loader ts-node/esm --watch server.ts",
     "start": "concurrently \"npm run server\" \"npm run dev\"",
     "seed": "node --loader ts-node/esm seed.ts",
-    "build": "prisma generate && prisma migrate deploy --skip-seed && prisma db seed && vite build",
+    "build": "prisma generate && prisma migrate deploy && prisma db seed && vite build",
     "preview": "vite preview"
   },
   "prisma": {

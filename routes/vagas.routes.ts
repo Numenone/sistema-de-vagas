@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { getAllVagas, getVagaById, createVaga, updateVaga, deleteVaga } from '../controllers/vagas.controller';
-import { validate } from '../middlewares/validate';
-import { createVagaSchema, updateVagaSchema } from '../schemas/vaga.schema';
+import { getAllVagas, getVagaById, createVaga, updateVaga, deleteVaga } from '../controllers/vagas.controller.ts';
+import { validate } from '../middlewares/validate.ts';
+import { createVagaSchema, updateVagaSchema } from '../schemas/vaga.schema.ts';
 
 const vagasRouter = Router();
 
@@ -13,4 +13,3 @@ vagasRouter.patch('/:id', validate(updateVagaSchema), updateVaga);
 vagasRouter.delete('/:id', deleteVaga);
 
 export default vagasRouter;
-

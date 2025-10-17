@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 export const createCandidaturaSchema = z.object({
   body: z.object({
-    usuarioId: z.number({ required_error: 'O ID do usuário é obrigatório.' }).int(),
-    vagaId: z.number({ required_error: 'O ID da vaga é obrigatório.' }).int(),
-    descricao: z.string({ required_error: 'A descrição da candidatura é obrigatória.' }),
+    usuarioId: z.number({ invalid_type_error: 'O ID do usuário é obrigatório.' }).int(),
+    vagaId: z.number({ invalid_type_error: 'O ID da vaga é obrigatório.' }).int(),
+    descricao: z.string({ invalid_type_error: 'A descrição da candidatura é obrigatória.' }),
     status: z.string().optional().default('pendente'),
   }),
 });

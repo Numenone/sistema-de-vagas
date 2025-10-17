@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as UsuarioService from '../services/usuario.service';
+import * as UsuarioService from '../services/usuario.service.ts';
 
 export const getAllUsuarios = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -28,6 +28,20 @@ export const createUsuario = async (req: Request, res: Response, next: NextFunct
   try {
     const novoUsuario = await UsuarioService.create(req.body);
     res.status(201).json(novoUsuario);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const loginUsuario = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, senha } = req.body;
+    const usuario = await UsuarioService.getByEmailAndPassword(email, senha);
+    if (usuario) {
+      res.json(usuario);
+    } else {
+      res.status(401).json({ error: 'Email ou senha incorretos' });
+    }
   } catch (error) {
     next(error);
   }

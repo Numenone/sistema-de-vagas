@@ -5,7 +5,6 @@ import {
   Briefcase, 
   UserPlus, 
   Clock, 
-  Building,
   FileText,
   BarChart3,
   PieChart,
@@ -14,30 +13,12 @@ import {
   Building2,
   ClipboardList
 } from 'lucide-react'; 
-import type { VagaType } from '../utils/VagaType';
-import type { CandidaturaType } from '../utils/CandidaturaType';
-import type { UsuarioType } from '../utils/UsuarioType';
-import type { EmpresaType } from '../utils/EmpresaType';
-
-type ChartType = 'empresa' | 'status' | 'salario' | 'topVagas';
-
-type PieChartData = { x: string; y: number; name: string };
-type BarChartData = { x: string; y: number; label: string };
-
-type ChartData = {
-  porEmpresa: PieChartData[];
-  porStatus: PieChartData[];
-  porSalario: PieChartData[];
-  topVagas: BarChartData[];
-};
-
-type TimelineItem = {
-  id: string;
-  type: 'vaga' | 'candidatura';
-  date: Date;
-  Icon: React.ElementType;
-  text: string;
-};
+import {
+  type ChartData, type ChartType, type TimelineItem, type PieChartData,
+  processVagasPorEmpresa, processCandidaturasPorStatus,
+  processVagasPorSalario, processTopVagas, processTimeline,
+  formatTimelineDate
+} from '../utils/dashboard.utils';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -112,38 +93,22 @@ export default function Dashboard() {
         setLoading(true);
         setError(null);
 
-        const fetchData = async <T,>(endpoint: string): Promise<T> => {
-          const response = await fetch(endpoint);
-          if (!response.ok) throw new Error(`Falha ao buscar dados de ${endpoint}`);
-          return response.json();
-        };
-
-        const [vagasData, usuariosData, candidaturasData, empresasData] = 
-          await Promise.all([
-            fetchData<VagaType[]>(`${apiUrl}/api/vagas?_expand=empresa`),
-            fetchData<UsuarioType[]>(`${apiUrl}/api/usuarios?tipo=candidato`),
-            fetchData<CandidaturaType[]>(`${apiUrl}/api/candidaturas`),
-            fetchData<EmpresaType[]>(`${apiUrl}/api/empresas`),
-          ]);
-        
-        const vagasMap = new Map(vagasData.map(v => [v.id, v]));
-        const usuariosMap = new Map(usuariosData.map(u => [u.id, u]));
-        const candidaturasCompletas = candidaturasData.map(c => ({ ...c, vaga: vagasMap.get(c.vagaId), usuario: usuariosMap.get(c.usuarioId) }));
+        // This assumes you have created the new backend endpoint
+        const response = await fetch(`${apiUrl}/api/dashboard-stats`);
+        if (!response.ok) throw new Error('Falha ao buscar dados do dashboard.');
+        const { stats: fetchedStats, vagas, candidaturas } = await response.json();
 
         // Processamento para os cards de estatísticas
-        setStats({
-          totalVagas: vagasData.length,
-          totalCandidatos: usuariosData.length,
-          totalCandidaturas: candidaturasData.length,
-          totalEmpresas: empresasData.length,
-        });
+        setStats(fetchedStats);
 
         // Processamento para os gráficos
-        const porEmpresa = processVagasPorEmpresa(vagasData);
-        const porStatus = processCandidaturasPorStatus(candidaturasCompletas);
-        const porSalario = processVagasPorSalario(vagasData);
-        const topVagasData = processTopVagas(candidaturasCompletas, vagasData);
-        const timelineItems = processTimeline(vagasData, candidaturasCompletas);
+        const porEmpresa = processVagasPorEmpresa(vagas);
+        const porStatus = processCandidaturasPorStatus(candidaturas);
+        const porSalario = processVagasPorSalario(vagas);
+        const topVagasData = processTopVagas(candidaturas, vagas);
+        
+        // Pass only recent data to timeline to improve performance
+        const timelineItems = processTimeline(vagas, candidaturas);
 
         setTimelineItems(timelineItems);
         setChartData({ porEmpresa, porStatus, porSalario, topVagas: topVagasData });
@@ -333,109 +298,3 @@ const ChartButton: FC<{ icon: React.ElementType, label: string, chartType: Chart
     <Icon size={16} /> {label}
   </button>
 );
-
-// --- Funções de Processamento de Dados ---
-
-function processVagasPorEmpresa(vagas: VagaType[]): PieChartData[] {
-  const countMap = new Map<string, number>();
-  vagas.forEach(vaga => {
-    const nomeEmpresa = vaga.empresa?.nome || 'Sem Empresa';
-    countMap.set(nomeEmpresa, (countMap.get(nomeEmpresa) || 0) + 1);
-  });
-  return Array.from(countMap.entries()).map(([nome, count]) => ({
-    x: nome,
-    y: count,
-    name: `${nome} (${count})`
-  }));
-}
-
-function processCandidaturasPorStatus(candidaturas: CandidaturaType[]): PieChartData[] {
-  const countMap = new Map<string, number>();
-  candidaturas.forEach(candidatura => {
-    const status = candidatura.status || 'indefinido';
-    countMap.set(status, (countMap.get(status) || 0) + 1);
-  });
-  return Array.from(countMap.entries()).map(([status, count]) => ({
-    x: status,
-    y: count,
-    name: `${status} (${count})`
-  }));
-}
-
-const faixasSalariais: Record<string, (s: number) => boolean> = {
-  'Até R$3k': (s) => s <= 3000,
-  'R$3k - R$6k': (s) => s > 3000 && s <= 6000,
-  'R$6k - R$10k': (s) => s > 6000 && s <= 10000,
-  'Acima de R$10k': (s) => s > 10000,
-};
-
-function processVagasPorSalario(vagas: VagaType[]): PieChartData[] {
-  const countMap = new Map<string, number>();
-  vagas.forEach(vaga => {
-    for (const faixa in faixasSalariais) {
-      if (vaga.salario && faixasSalariais[faixa](vaga.salario)) {
-        countMap.set(faixa, (countMap.get(faixa) || 0) + 1);
-        break;
-      }
-    }
-  });
-  return Array.from(countMap.entries()).map(([faixa, count]) => ({
-    x: faixa,
-    y: count,
-    name: `${faixa} (${count})`
-  }));
-}
-
-function processTopVagas(candidaturas: CandidaturaType[], vagas: VagaType[]): BarChartData[] {
-  const vagasMap = new Map(vagas.map(v => [v.id, v]));
-  const countMap = new Map<string, number>();
-
-  candidaturas.forEach(candidatura => {
-    const vaga = vagasMap.get(candidatura.vagaId);
-    if (vaga) {
-      countMap.set(vaga.titulo, (countMap.get(vaga.titulo) || 0) + 1);
-    }
-  });
-
-  return Array.from(countMap.entries())
-    .sort(([, countA], [, countB]) => countB - countA)
-    .slice(0, 5)
-    .map(([titulo, count]) => {
-      const nomeCurto = titulo.length > 15 ? `${titulo.substring(0, 15)}...` : titulo;
-      return { x: nomeCurto, y: count, label: `${nomeCurto}\n(${count})` };
-    });
-}
-
-function processTimeline(vagas: VagaType[], candidaturas: CandidaturaType[]): TimelineItem[] {
-  const vagaActivities: TimelineItem[] = vagas.map(vaga => ({
-    id: `vaga-${vaga.id}`,
-    type: 'vaga',
-    date: new Date(vaga.createdAt),
-    Icon: Briefcase,
-    text: `Nova vaga: "${vaga.titulo}" na ${vaga.empresa?.nome || 'empresa desconhecida'}.`
-  }));
-
-  const candidaturaActivities: TimelineItem[] = candidaturas.map(candidatura => ({
-    id: `cand-${candidatura.id}`,
-    type: 'candidatura',
-    date: new Date(candidatura.createdAt),
-    Icon: UserPlus,
-    text: `${candidatura.usuario?.nome || 'Candidato desconhecido'} se candidatou para "${candidatura.vaga?.titulo || 'vaga desconhecida'}".`
-  }));
-
-  return [...vagaActivities, ...candidaturaActivities]
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 10);
-}
-
-// --- Funções Utilitárias ---
-
-function formatTimelineDate(date: Date): string {
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
-}

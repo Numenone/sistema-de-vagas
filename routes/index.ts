@@ -1,14 +1,14 @@
-import { Router } from 'express';
-import vagasRouter from '../vagas.routes';
-import usuariosRouter from './usuarios.routes';
-import empresasRouter from './empresas.routes';
-import candidaturasRouter from './candidaturas.routes';
+import express from 'express';
+import vagasRouter from './vagas.routes.ts'; // Ensure this path is correct
+import usuariosRouter from './usuarios.routes.ts';
+import empresasRouter from './empresas.routes.ts';
+import candidaturasRouter from './candidaturas.routes.ts';
 
-const routes = Router();
+const routes = express.Router();
 
-routes.use('/api/vagas', vagasRouter);
-routes.use('/api/usuarios', usuariosRouter);
-routes.use('/api/empresas', empresasRouter);
-routes.use('/api/candidaturas', candidaturasRouter);
+routes.use('/vagas', vagasRouter);
+routes.use('/usuarios', usuariosRouter);
+routes.use('/empresas', empresasRouter);
+routes.use('/candidaturas', candidaturasRouter);
 
 export default routes;

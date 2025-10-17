@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
 import { useUsuarioStore } from "./context/UsuarioContext"
 import React from 'react'
@@ -20,12 +20,20 @@ export default function Login() {
 
     async function verificaLogin(data: Inputs) {
         try {
-            const response = await fetch(`${apiUrl}/api/usuarios?email=${data.email}&senha=${data.senha}`)
-            const usuarios = await response.json()
-            
-            if (usuarios.length > 0) {
-                const usuario = usuarios[0]
-                logaUsuario(usuario, data.manter)
+            const response = await fetch(`${apiUrl}/api/usuarios/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: data.email,
+                    senha: data.senha
+                })
+            });
+
+            if (response.ok) {
+                const usuario = await response.json();
+                logaUsuario(usuario, data.manter);
                 
                 navigate("/")
             } else {
@@ -88,7 +96,7 @@ export default function Login() {
                             Entrar
                         </button>
                         <p className="text-sm font-light text-gray-500">
-                            Ainda não possui conta? <a href="/cadastro" className="font-medium text-blue-600 hover:underline">Cadastre-se</a>
+                            Ainda não possui conta? <Link to="/cadastro" className="font-medium text-blue-600 hover:underline">Cadastre-se</Link>
                         </p>
                     </form>
                 </div>

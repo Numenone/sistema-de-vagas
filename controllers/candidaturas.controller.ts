@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as CandidaturaService from '../services/candidatura.service';
+import * as CandidaturaService from '../services/candidatura.service.ts';
 
 export const getAllCandidaturas = async (req: Request, res: Response, next: NextFunction) => {
   try {
