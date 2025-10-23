@@ -10,7 +10,7 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
-export function initializeWebSocket(server: Server) {
+export function initializeWebSocket(_server: Server) {
   console.log('🚀 Pusher service configured. WebSocket handling is now managed by Pusher.');
 }
 

@@ -15,14 +15,15 @@ app.use(express.json());
 // All API routes will be prefixed with /api
 app.use('/api', routes);
 
-// Servir arquivos estáticos do front-end
+// --- Servir Arquivos Estáticos do Frontend ---
+// Esta rota deve vir ANTES da rota catch-all para servir assets como .js, .css, .svg, etc.
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Rota catch-all para servir o index.html do front-end
+// --- Rota Catch-all para Single Page Application (SPA) ---
+// Para qualquer outra rota GET que não seja uma API, sirva o index.html.
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
-
 // Global error handler middleware (must be last)
 app.use(errorHandler);
 

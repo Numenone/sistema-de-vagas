@@ -28,3 +28,15 @@ export async function updateEmpresa(req: Request, res: Response) {
 
   res.json(empresaAtualizada);
 }
+
+export const deleteEmpresa = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await adminEmpresasService.remove(Number(id));
+  res.status(204).send();
+};
+
+export const restoreEmpresa = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const empresaRestaurada = await adminEmpresasService.restore(Number(id));
+  res.json(empresaRestaurada);
+};

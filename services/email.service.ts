@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport(emailConfig);
  */
 export async function sendPasswordResetEmail(to: string, token: string) {
   // A URL deve apontar para a sua página de redefinição de senha no frontend
-  const resetUrl = `${process.env.VITE_APP_URL || 'http://localhost:5173'}/redefinir-senha?token=${token}`;
+  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/redefinir-senha?token=${token}`;
 
   const mailOptions = {
     from: process.env.EMAIL_FROM,

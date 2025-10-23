@@ -128,6 +128,9 @@ export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
       if (!response.ok) {
         throw new Error('Falha ao enviar mensagem.');
       }
+      // Limpa o timeout de digitação e informa que parou de digitar
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      triggerTypingEvent(false);
       reset();
     } catch (error) {
       toast.error('Erro ao enviar mensagem.');

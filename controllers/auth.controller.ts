@@ -71,7 +71,7 @@ export const getCandidatoProfile = async (req: Request, res: Response, next: Nex
     }
 
     // Remove a senha do objeto antes de enviar
-    const { senha, ...perfil } = candidato;
+    const { senha: _senha, ...perfil } = candidato;
 
     res.json(perfil);
   } catch (error) {

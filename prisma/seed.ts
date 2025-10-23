@@ -1,172 +1,71 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Start seeding...');
 
-  // Limpar dados existentes na ordem correta para evitar conflitos de chave estrangeira
+  // Limpa as tabelas na ordem correta para evitar conflitos de chave estrangeira
+  await prisma.mensagem.deleteMany({});
   await prisma.candidatura.deleteMany();
   await prisma.atividade.deleteMany();
-  // A tabela de junção implícita para favoritos e habilidades precisa ser limpa com raw SQL
-  await prisma.$executeRaw`DELETE FROM "_VagasFavoritas"`;
-  await prisma.$executeRaw`DELETE FROM "_HabilidadeToVaga"`;
+  // Limpa tabelas de junção implícitas
+  if ((prisma as any)._executeRawUnsafe) { // Verifica se o método existe para evitar erros com versões diferentes
+    await (prisma as any)._executeRawUnsafe(`DELETE FROM "_VagasFavoritas"`);
+    await (prisma as any)._executeRawUnsafe(`DELETE FROM "_HabilidadeToVaga"`);
+  }
   await prisma.vaga.deleteMany();
   await prisma.usuario.deleteMany();
   await prisma.empresa.deleteMany();
   await prisma.habilidade.deleteMany();
-
   console.log('Cleared existing data.');
 
-  // Criar Habilidades
-  const habilidades = await prisma.habilidade.createManyAndReturn({
-    data: [
-      { nome: 'React' },
-      { nome: 'Node.js' },
-      { nome: 'TypeScript' },
-      { nome: 'Prisma' },
-      { nome: 'PostgreSQL' },
-      { nome: 'Docker' },
-      { nome: 'GraphQL' },
-    ],
-  });
-  console.log('Created skills.');
+  const dbPath = path.join(__dirname, '..', 'db.json');
+  const dbData = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
 
-  // Criar Empresas
-  const empresas = await prisma.empresa.createManyAndReturn({
-    data: [
-      {
-        nome: 'Tech Solutions',
-        descricao: 'Empresa de tecnologia inovadora focada em desenvolvimento web e mobile.',
-        logo: 'https://res.cloudinary.com/dtykejd3r/image/upload/v1726100192/linkedont_empresas/logo-tech-solutions.png',
-      },
-      {
-        nome: 'DevCorp',
-        descricao: 'Desenvolvimento de software corporativo e soluções empresariais.',
-        logo: 'https://res.cloudinary.com/dtykejd3r/image/upload/v1726100192/linkedont_empresas/logo-devcorp.png',
-      },
-      {
-        nome: 'InovaTech',
-        descricao: 'Startup de tecnologia com foco em inteligência artificial.',
-        logo: 'https://res.cloudinary.com/dtykejd3r/image/upload/v1726100192/linkedont_empresas/logo-inovatech.png',
-      },
-    ],
-  });
-  console.log('Created companies.');
+  // 1. Empresas
+  for (const empresa of dbData.empresas) {
+    const { id: _id, ...data } = empresa;
+    await prisma.empresa.create({ data });
+  }
+  console.log('Empresas inseridas.');
 
-  // Criar Usuários
-  const salt = await bcrypt.genSalt(10);
-  const senhaHash = await bcrypt.hash('123456', salt);
-
-  await prisma.usuario.create({
-    data: {
-      nome: 'Admin',
-      email: 'admin@linkedont.com',
-      senha: senhaHash,
-      tipo: 'admin',
-      fotoPerfil: 'https://res.cloudinary.com/dtykejd3r/image/upload/v1726100191/linkedont_users/user-admin.png',
-    },
-  });
-
-  await prisma.usuario.create({
-    data: {
-      nome: 'Líder Tech',
-      email: 'lider@techsolutions.com',
-      senha: senhaHash,
-      tipo: 'lider',
-      empresaId: empresas[0].id,
-      fotoPerfil: 'https://res.cloudinary.com/dtykejd3r/image/upload/v1726100191/linkedont_users/user-lider.png',
-    },
-  });
-
-  const candidato = await prisma.usuario.create({
-    data: {
-      nome: 'Candidato Dev',
-      email: 'candidato@email.com',
-      senha: senhaHash,
-      tipo: 'candidato',
-      fotoPerfil: 'https://res.cloudinary.com/dtykejd3r/image/upload/v1726100191/linkedont_users/user-candidato.png',
-    },
-  });
-  console.log('Created users.');
-
-  // Criar Vagas
-  const vaga1 = await prisma.vaga.create({
-    data: {
-      titulo: 'Desenvolvedor(a) Front-end Pleno',
-      descricao: 'Buscamos um(a) desenvolvedor(a) Front-end com experiência em React para se juntar à nossa equipe.',
-      requisitos: 'React, TypeScript, Styled-Components, Testes unitários.',
-      salario: 7500,
-      modalidade: 'Remoto',
-      tipoContrato: 'CLT',
-      empresaId: empresas[0].id,
-      habilidades: {
-        connect: [{ id: habilidades[0].id }, { id: habilidades[2].id }],
+  // 2. Usuários (com hash de senha)
+  for (const usuario of dbData.usuarios) {
+    const { id: _id, senha, ...data } = usuario;
+    const salt = await bcrypt.genSalt(10);
+    const senhaHash = await bcrypt.hash(senha, salt);
+    await prisma.usuario.create({
+      data: {
+        ...data,
+        senha: senhaHash,
       },
-    },
-  });
+    });
+  }
+  console.log('Usuários inseridos.');
 
-  const vaga2 = await prisma.vaga.create({
-    data: {
-      titulo: 'Engenheiro(a) de Software Back-end Sênior',
-      descricao: 'Vaga para atuar em projetos de alta complexidade utilizando Node.js e Prisma.',
-      requisitos: 'Node.js, Prisma, PostgreSQL, Docker, Arquitetura de microsserviços.',
-      salario: 12000,
-      modalidade: 'Híbrido',
-      tipoContrato: 'PJ',
-      empresaId: empresas[1].id,
-      habilidades: {
-        connect: [{ id: habilidades[1].id }, { id: habilidades[3].id }, { id: habilidades[4].id }, { id: habilidades[5].id }],
-      },
-    },
-  });
-  console.log('Created jobs.');
+  // 3. Vagas
+  for (const vaga of dbData.vagas) {
+    const { id: _id, ...data } = vaga;
+    // Adiciona valores padrão para campos que não estão no db.json
+    data.modalidade = data.modalidade || 'Não informado';
+    data.tipoContrato = data.tipoContrato || 'Não informado';
+    await prisma.vaga.create({ data });
+  }
+  console.log('Vagas inseridas.');
 
-  // Criar Candidaturas
-  await prisma.candidatura.createMany({
-    data: [
-      {
-        usuarioId: candidato.id,
-        vagaId: vaga1.id,
-        descricao: 'Tenho muito interesse na vaga e possuo 3 anos de experiência com React e TypeScript.',
-        status: 'Enviada',
-      },
-    ],
-    skipDuplicates: true, // Evita erros se a candidatura já existir
-  });
-  console.log('Created applications.');
-
-  // Favoritar Vaga
-  await prisma.usuario.update({
-    where: { id: candidato.id },
-    data: {
-      vagasFavoritas: {
-        connect: { id: vaga2.id },
-      },
-    },
-  });
-  console.log('Created favorites.');
-
-  // Criar Atividades
-  await prisma.atividade.createMany({
-    data: [
-      {
-        tipo: 'NOVA_VAGA',
-        vagaId: vaga1.id,
-      },
-      {
-        tipo: 'NOVA_VAGA',
-        vagaId: vaga2.id,
-      },
-      {
-        tipo: 'NOVA_CANDIDATURA',
-        usuarioId: candidato.id,
-        vagaId: vaga1.id,
-      },
-    ],
-  });
-  console.log('Created activities.');
+  // 4. Candidaturas
+  for (const candidatura of dbData.candidaturas) {
+    const { id: _id, ...data } = candidatura;
+    // Garante que o status seja um dos valores válidos ou um padrão
+    const validStatus = ['Enviada', 'Em Análise', 'Aprovada', 'Rejeitada'].includes(data.status) ? data.status : 'Enviada';
+    data.status = validStatus;
+    await prisma.candidatura.create({ data });
+  }
+  console.log('Candidaturas inseridas.');
 
   console.log('Seeding finished.');
 }

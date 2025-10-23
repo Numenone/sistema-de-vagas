@@ -22,8 +22,8 @@ model Usuario {
   fotoPerfil           String?
   ativo                Boolean       @default(true)
   empresaId            Int?
-  resetPasswordToken   String?
-  resetPasswordExpires DateTime?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -34,9 +34,10 @@ model Usuario {
   atividades    Atividade[]
   mensagensEnviadas  Mensagem[] @relation("MensagensEnviadas")
   mensagensRecebidas Mensagem[] @relation("MensagensRecebidas")
-  pushSubscriptions PushSubscription[]
+  pushSubscriptions PushSubscription[] @relation("UsuarioPushSubscriptions")
 
   @@index([empresaId])
+  @@index([passwordResetToken])
 }
 
 model Empresa {
@@ -59,8 +60,6 @@ model Vaga {
   descricao    String
   requisitos   String
   salario      Float
-  modalidade   String
-  tipoContrato String
   ativa        Boolean  @default(true)
   empresaId    Int
 
@@ -74,6 +73,7 @@ model Vaga {
   atividades    Atividade[]
 
   @@index([empresaId])
+  
 }
 
 model Candidatura {
@@ -140,6 +140,8 @@ model PushSubscription {
   p256dh    String
   auth      String
   usuarioId Int
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuario   Usuario  @relation("UsuarioPushSubscriptions", fields: [usuarioId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@index([usuarioId])
 }

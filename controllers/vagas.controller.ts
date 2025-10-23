@@ -24,6 +24,19 @@ export const getVagaById = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const getVagaByIdWithSimilares = async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  try {
+    const result = await VagaService.getByIdWithSimilares(Number(id));
+    if (result) {
+      res.json(result);
+    } else {
+      res.status(404).json({ error: 'Vaga não encontrada' });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 export const createVaga = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const novaVaga = await VagaService.create(req.body);

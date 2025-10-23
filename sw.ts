@@ -1,7 +1,10 @@
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
 import { clientsClaim } from 'workbox-core'
 import { registerRoute } from 'workbox-routing'
-import { StaleWhileRevalidate } from 'workbox-strategies'
+import { StaleWhileRevalidate} from 'workbox-strategies'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+
+/// <reference types="vite/client" />
 
 declare let self: ServiceWorkerGlobalScope
 
@@ -15,12 +18,20 @@ cleanupOutdatedCaches()
 self.skipWaiting()
 clientsClaim()
 
-// Runtime caching for API calls
+// --- Runtime Caching ---
+
+// Estratégia para chamadas de API: Tenta a rede primeiro, mas se estiver offline,
+// usa o cache. Armazena no cache apenas respostas bem-sucedidas (status 2xx).
 const apiUrl = import.meta.env.VITE_API_URL;
 registerRoute(
   ({ url }) => url.href.startsWith(apiUrl),
   new StaleWhileRevalidate({
     cacheName: 'api-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [200, 201], // Armazena apenas respostas bem-sucedidas
+      }),
+    ],
   })
 );
 
