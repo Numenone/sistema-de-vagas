@@ -24,6 +24,19 @@ export const getEmpresaById = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+export const getEmpresaByIdWithVagas = async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  try {
+    const empresa = await EmpresaService.getByIdWithVagas(Number(id), req.query);
+    if (empresa) {
+      res.json(empresa);
+    } else {
+      res.status(404).json({ error: 'Empresa não encontrada' });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 export const createEmpresa = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const novaEmpresa = await EmpresaService.create(req.body);

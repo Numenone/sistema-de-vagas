@@ -24,8 +24,8 @@ registerRoute(
   })
 );
 
-self.addEventListener('push', (event) => {
-  const data = event.data.json()
+self.addEventListener('push', (event: PushEvent) => {
+  const data = event.data?.json()
 
   const options = {
     body: data.body,
@@ -39,7 +39,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(data.title, options))
 })
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', (event: NotificationEvent) => {
   event.notification.close()
   const urlToOpen = new URL(event.notification.data.url, self.location.origin).href
 

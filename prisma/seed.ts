@@ -59,7 +59,7 @@ async function main() {
   const salt = await bcrypt.genSalt(10);
   const senhaHash = await bcrypt.hash('123456', salt);
 
-  const admin = await prisma.usuario.create({
+  await prisma.usuario.create({
     data: {
       nome: 'Admin',
       email: 'admin@linkedont.com',
@@ -69,7 +69,7 @@ async function main() {
     },
   });
 
-  const lider = await prisma.usuario.create({
+  await prisma.usuario.create({
     data: {
       nome: 'Líder Tech',
       email: 'lider@techsolutions.com',

@@ -2,8 +2,11 @@ import { prisma } from '../lib/prisma';
 import { Vaga, Prisma } from '@prisma/client';
 
 export const getAll = async (query: any): Promise<Vaga[]> => {
-  const { q, ativa, _expand } = query;
-  const where: Prisma.VagaWhereInput = {};
+  const { q, ativa, _expand, adminSearch} = query;
+  const where: Prisma.VagaWhereInput = {
+    // Garante que vagas de empresas inativas nunca sejam mostradas, exceto no painel de admin
+    empresa: adminSearch ? undefined : { ativo: true },
+  };
   if (ativa === 'true') where.ativa = true;
   if (q) {
     where.OR = [

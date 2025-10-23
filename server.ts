@@ -1,6 +1,6 @@
 import http from 'http';
 import app from './index'; // Importa a configuração do app
-import { initializeWebSocket } from './websocket';
+import { initializeWebSocket } from './routes/websocket';
 
 const port = process.env.PORT || 3000;
 

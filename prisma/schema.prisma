@@ -34,6 +34,7 @@ model Usuario {
   atividades    Atividade[]
   mensagensEnviadas  Mensagem[] @relation("MensagensEnviadas")
   mensagensRecebidas Mensagem[] @relation("MensagensRecebidas")
+  pushSubscriptions PushSubscription[]
 
   @@index([empresaId])
 }
@@ -131,4 +132,14 @@ model Mensagem {
   @@index([remetenteId])
   @@index([destinatarioId])
   @@index([candidaturaId])
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  usuarioId Int
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }

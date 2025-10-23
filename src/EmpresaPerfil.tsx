@@ -5,11 +5,15 @@ import { CardVaga } from './component/CardVaga';
 import type { EmpresaType } from './utils/EmpresaType';
 import type { VagaType } from './utils/VagaType';
 import { useUsuarioStore } from './context/UsuarioContext';
+import { PaginationControls } from './component/PaginationControls';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 interface EmpresaComVagas extends EmpresaType {
     vagas: VagaType[];
+    totalVagas: number;
+    totalPages: number;
+    currentPage: number;
 }
 
 export default function EmpresaPerfil() {
@@ -17,16 +21,20 @@ export default function EmpresaPerfil() {
     const [empresa, setEmpresa] = useState<EmpresaComVagas | null>(null);
     const [loading, setLoading] = useState(true);
     const { usuario } = useUsuarioStore();
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         async function fetchEmpresa() {
             try {
-                const response = await fetch(`${apiUrl}/api/empresas/${id}`);
+                setLoading(true);
+                const params = new URLSearchParams({ page: currentPage.toString() });
+                const response = await fetch(`${apiUrl}/api/empresas/${id}?${params.toString()}`);
                 if (!response.ok) throw new Error("Empresa não encontrada.");
                 const data = await response.json();
                 setEmpresa(data);
             } catch (error) {
                 toast.error("Erro ao carregar dados da empresa.");
+                setEmpresa(null); // Limpa em caso de erro para evitar mostrar dados antigos
             } finally {
                 setLoading(false);
             }
@@ -34,7 +42,11 @@ export default function EmpresaPerfil() {
         if (id) {
             fetchEmpresa();
         }
-    }, [id]);
+    }, [id, currentPage]);
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+    };
 
     if (loading) {
         return <div className="p-6 text-center">Carregando perfil da empresa...</div>;
@@ -63,13 +75,23 @@ export default function EmpresaPerfil() {
                 </div>
             </div>
 
-            <h2 className="text-2xl font-bold mb-6">Vagas Ativas ({empresa.vagas.length})</h2>
+            <h2 className="text-2xl font-bold mb-6">Vagas Ativas ({empresa.totalVagas})</h2>
             {empresa.vagas.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {empresa.vagas.map(vaga => (
-                        <CardVaga key={vaga.id} data={vaga} />
-                    ))}
-                </div>
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {empresa.vagas.map(vaga => (
+                            <CardVaga key={vaga.id} data={vaga} />
+                        ))}
+                    </div>
+                    {empresa.totalPages > 1 && (
+                        <div className="mt-8 flex justify-center">
+                            <PaginationControls 
+                                currentPage={empresa.currentPage} 
+                                totalPages={empresa.totalPages} 
+                                onPageChange={handlePageChange} />
+                        </div>
+                    )}
+                </>
             ) : (
                 <p className="text-gray-500">Esta empresa não possui vagas ativas no momento.</p>
             )}

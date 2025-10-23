@@ -20,7 +20,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 router.get('/', empresasController.getAllEmpresas);
-router.get('/:id', empresasController.getEmpresaByIdWithVagas);
+router.get('/:id', empresasController.getEmpresaByIdWithVagas); // Agora esta função existe
 router.patch('/:id', upload.single('logo'), validate(updateEmpresaSchema), empresasController.updateEmpresa);
 
 export default router;

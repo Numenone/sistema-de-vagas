@@ -29,4 +29,10 @@ router.patch('/:id/status', authenticateToken, isAdmin, adminEmpresasController.
 // --- PATCH /api/admin/empresas/:id (Admin atualiza uma empresa) ---
 router.patch('/:id', authenticateToken, isAdmin, upload.single('logo'), adminEmpresasController.updateEmpresa);
 
+// --- DELETE /api/admin/empresas/:id (Admin deleta uma empresa) ---
+router.delete('/:id', authenticateToken, isAdmin, adminEmpresasController.deleteEmpresa);
+
+// --- PATCH /api/admin/empresas/:id/restore (Admin restaura uma empresa) ---
+router.patch('/:id/restore', authenticateToken, isAdmin, adminEmpresasController.restoreEmpresa);
+
 export default router;

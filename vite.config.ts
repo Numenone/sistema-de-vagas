@@ -9,8 +9,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.ts',
+      srcDir: '.', // Look in the root directory
+      filename: 'sw.ts', // The name of the service worker file
       devOptions: {
         enabled: true, // Enable PWA in development
       },

@@ -17,6 +17,10 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   );
 }
 
+export function isPushAvailable() {
+  return !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
+}
+
 export const sendPushNotification = (subscription: SubscriptionJSON, payload: string) => webpush.sendNotification(subscription, payload);
 
 export async function saveSubscription(subscription: SubscriptionJSON, usuarioId: number) {

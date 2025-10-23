@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useUsuarioStore } from '../context/UsuarioContext';
@@ -20,22 +20,22 @@ export default function GerenciarEmpresas() {
   const [searchTerm, setSearchTerm] = useState('');
   const { fetchAutenticado } = useUsuarioStore();
 
-  useEffect(() => {
-    const fetchEmpresas = async () => {
-      try {
-        setLoading(true);
-        const url = searchTerm ? `${apiUrl}/api/admin/empresas?search=${encodeURIComponent(searchTerm)}` : `${apiUrl}/api/admin/empresas`;
-        const response = await fetchAutenticado(url);
-        if (!response.ok) throw new Error('Falha ao buscar empresas.');
-        const data = await response.json();
-        setEmpresas(data);
-      } catch (error) {
-        toast.error('Erro ao carregar empresas.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchEmpresas = useCallback(async () => {
+    try {
+      setLoading(true);
+      const url = searchTerm ? `${apiUrl}/api/admin/empresas?search=${encodeURIComponent(searchTerm)}` : `${apiUrl}/api/admin/empresas`;
+      const response = await fetchAutenticado(url);
+      if (!response.ok) throw new Error('Falha ao buscar empresas.');
+      const data = await response.json();
+      setEmpresas(data);
+    } catch (error) {
+      toast.error('Erro ao carregar empresas.');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchAutenticado, searchTerm]);
 
+  useEffect(() => {
     // Debounce para evitar muitas requisições enquanto o usuário digita
     const handler = setTimeout(() => {
       fetchEmpresas();
@@ -44,7 +44,7 @@ export default function GerenciarEmpresas() {
     return () => {
       clearTimeout(handler);
     };
-  }, [fetchAutenticado, searchTerm]);
+  }, [fetchEmpresas, searchTerm]);
 
   async function handleStatusChange(empresaId: number, currentStatus: boolean) {
     const action = currentStatus ? 'desativar' : 'ativar';
@@ -62,6 +62,25 @@ export default function GerenciarEmpresas() {
       setEmpresas(prev => prev.map(emp => emp.id === empresaId ? { ...emp, ativo: !currentStatus } : emp));
     } catch (error) {
       toast.error(`Erro ao ${action} a empresa.`);
+    }
+  }
+
+    async function handleRestore(empresaId: number) {
+    if (!confirm('Deseja reativar esta empresa? As vagas associadas não serão reativadas automaticamente.')) {
+      return;
+    }
+    try {
+      const response = await fetchAutenticado(`${apiUrl}/api/admin/empresas/${empresaId}/restore`, {
+        method: 'PATCH',
+      });
+      if (response.ok) {
+        toast.success('Empresa reativada com sucesso!');
+        fetchEmpresas(); // Atualiza a lista
+      } else {
+        throw new Error('Falha ao reativar empresa.');
+      }
+    } catch (error) {
+      toast.error('Erro ao reativar a empresa.');
     }
   }
 
@@ -96,6 +115,7 @@ export default function GerenciarEmpresas() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Líderes</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vagas Ativas</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
             </tr>
           </thead>
@@ -114,19 +134,28 @@ export default function GerenciarEmpresas() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center gap-2">
                   <Briefcase size={16} /> {empresa._count.vagas}
                 </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${empresa.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {empresa.ativo ? 'Ativa' : 'Inativa'}
+                  </span>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex gap-2 justify-end">
-                    <button
-                      onClick={() => handleStatusChange(empresa.id, empresa.ativo)}
-                      className={empresa.ativo ? 'btn-danger' : 'btn-success'}
-                    >
-                      {empresa.ativo ? 'Desativar' : 'Ativar'}
-                    </button>
                     <Link to={`/admin/empresas/${empresa.id}/editar`} className="btn-secondary">
                       <Edit size={16} className="mr-2" /> Editar
                     </Link>
+                    {empresa.ativo ? (
+                      <button onClick={() => handleStatusChange(empresa.id, true)} className="btn-danger">
+                        Desativar
+                      </button>
+                    ) : (
+                      <button onClick={() => handleRestore(empresa.id)} className="btn-success">
+                        Restaurar
+                      </button>
+                    )}
                   </div>
                 </td>
+                
               </tr>
             ))}
           </tbody>
