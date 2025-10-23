@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as UsuarioService from '../services/usuario.service.ts';
+import * as UsuarioService from '../services/usuario.service';
 
 export const getAllUsuarios = async (req: Request, res: Response, next: NextFunction) => {
   try {

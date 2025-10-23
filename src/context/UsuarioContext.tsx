@@ -8,11 +8,13 @@ interface UsuarioState {
   usuario: UsuarioType;
   token: string | null;
   favoritos: number[]; // Armazena apenas os IDs das vagas favoritas
+  unreadCount: number; // Contagem de mensagens não lidas
   logaUsuario: (usuario: UsuarioType, token: string, manter: boolean) => void;
   deslogaUsuario: () => void;
   carregarUsuarioSalvo: () => void;
   fetchAutenticado: (url: string, options?: RequestInit) => Promise<Response>;
   fetchFavoritos: () => Promise<void>;
+  fetchUnreadCount: () => Promise<void>;
 }
 
 const usuarioVazio: UsuarioType = {
@@ -24,12 +26,14 @@ const usuarioVazio: UsuarioType = {
   createdAt: new Date(),
   updatedAt: new Date(),
   fotoPerfil: null,
+  ativo: false, // Adiciona a propriedade 'ativo' que estava faltando
 };
 
 export const useUsuarioStore = create<UsuarioState>((set, get) => ({
   usuario: usuarioVazio,
   token: null,
   favoritos: [],
+  unreadCount: 0,
 
   logaUsuario: (usuario, token, manter) => { // logaUsuario agora também busca os favoritos
     set({ usuario, token });
@@ -38,10 +42,12 @@ export const useUsuarioStore = create<UsuarioState>((set, get) => ({
     } else {
       sessionStorage.setItem('usuario', JSON.stringify({ usuario, token }));
     }
+    get().fetchFavoritos();
+    get().fetchUnreadCount();
   },
 
   deslogaUsuario: () => {
-    set({ usuario: usuarioVazio, token: null, favoritos: [] });
+    set({ usuario: usuarioVazio, token: null, favoritos: [], unreadCount: 0 });
     localStorage.removeItem('usuario');
     sessionStorage.removeItem('usuario');
   },
@@ -51,7 +57,8 @@ export const useUsuarioStore = create<UsuarioState>((set, get) => ({
     if (usuarioSalvo) {
       const { usuario, token } = JSON.parse(usuarioSalvo);
       set({ usuario, token });
-      get().fetchFavoritos(); // Busca favoritos ao carregar o usuário
+      get().fetchFavoritos();
+      get().fetchUnreadCount();
     }
   },
 
@@ -82,6 +89,20 @@ export const useUsuarioStore = create<UsuarioState>((set, get) => ({
       set({ favoritos: idsFavoritos });
     } catch (error) {
       console.error("Erro ao buscar favoritos:", error);
+    }
+  },
+
+  fetchUnreadCount: async () => {
+    const { token } = get();
+    if (!token) return;
+
+    try {
+      const response = await get().fetchAutenticado(`${apiUrl}/api/mensagens/unread-count`);
+      if (!response.ok) return;
+      const { count } = await response.json();
+      set({ unreadCount: count });
+    } catch (error) {
+      console.error("Erro ao buscar contagem de mensagens não lidas:", error);
     }
   },
 }));

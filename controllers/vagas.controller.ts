@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as VagaService from '../services/vaga.service.ts';
+import * as VagaService from '../services/vaga.service';
 
 export const getAllVagas = async (req: Request, res: Response, next: NextFunction) => {
   try {

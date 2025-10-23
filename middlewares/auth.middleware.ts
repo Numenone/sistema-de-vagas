@@ -1,20 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { PrismaClient, Usuario } from '@prisma/client';
+import * as jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 // É crucial que esta chave secreta seja guardada em variáveis de ambiente em produção!
 const JWT_SECRET = process.env.JWT_SECRET || 'SEU_SEGREDO_SUPER_SECRETO';
 
-// Estendendo a interface Request do Express para incluir o usuário
-declare global {
-  namespace Express {
-    export interface Request {
-      usuario?: Usuario;
-    }
-  }
-}
+
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];

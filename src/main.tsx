@@ -3,25 +3,31 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import React from 'react'
 
-import App from './App.tsx'
-import Login from './Login.tsx'
-import Detalhes from './Detalhes.tsx'
-import MinhasCandidaturas from './MinhasCandidaturas.tsx'
-import Cadastro from './Cadastro.tsx'
-import EditarPerfil from './EditarPerfil.tsx' // This line already exists and is correct.
-import MinhasVagas from './MinhasVagas.tsx'
-import EsqueciSenha from './EsqueciSenha.tsx'
-import EmpresaPerfil from './EmpresaPerfil.tsx'
-import MinhasVagasFavoritas from './MinhasVagasFavoritas.tsx'
-import RedefinirSenha from './RedefinirSenha.tsx'
+import App from './App'
+import Login from './Login'
+import Detalhes from './Detalhes'
+import MinhasCandidaturas from './MinhasCandidaturas'
+import CandidaturasEmpresa from './CandidaturasEmpresa' // Importar a nova página
+import PerfilCandidato from './PerfilCandidato'; // Importar a nova página de perfil
+import Cadastro from './Cadastro'
+import EditarPerfil from './EditarPerfil' // This line already exists and is correct.
+import MinhasVagas from './MinhasVagas'
+import EsqueciSenha from './EsqueciSenha'
+import EmpresaPerfil from './EmpresaPerfil'
+import EditarVagaAdmin from './EditarVagaAdmin'; // Importar a nova página
+import EditarEmpresaAdmin from './EditarEmpresaAdmin' // Importar a nova página
+import MinhasVagasFavoritas from './MinhasVagasFavoritas'
+import CriarEmpresaAdmin from './CriarEmpresaAdmin'; // Adicionar a nova rota de criação
+import RedefinirSenha from './RedefinirSenha'
 
-import Layout from './Layout.tsx'
+import Layout from './Layout'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Dashboard from './component/Dashboard.tsx';
-import GerenciarVagas from './component/GerenciarVagas.tsx';
-import GerenciarCandidaturas from './component/GerenciarCandidaturas.tsx';
-import AuthInitializer from './component/AuthInitializer.tsx';
-import AdminProtectedRoute from './component/AdminProtectedRoute.tsx';
+import Dashboard from './component/Dashboard';
+import GerenciarVagas from './component/GerenciarVagas';
+import GerenciarCandidaturas from './component/GerenciarCandidaturas';
+import GerenciarEmpresas from './component/GerenciarEmpresas'; // Importar a nova página
+import AuthInitializer from './component/AuthInitializer';
+import AdminProtectedRoute from './component/AdminProtectedRoute';
 
 const rotas = createBrowserRouter([
   {
@@ -41,6 +47,8 @@ const rotas = createBrowserRouter([
       { path: 'redefinir-senha', element: <RedefinirSenha /> },
       { path: 'empresas/:id', element: <EmpresaPerfil /> },
       { path: 'empresa/vagas', element: <MinhasVagas /> },
+      { path: 'empresa/candidaturas', element: <CandidaturasEmpresa /> },
+      { path: 'candidatos/:id', element: <PerfilCandidato /> }, // Adicionar a nova rota
       { path: 'perfil/editar', element: <EditarPerfil /> },
       { path: 'favoritos', element: <MinhasVagasFavoritas /> },
       { path: 'minhasCandidaturas', element: <MinhasCandidaturas /> },
@@ -48,7 +56,11 @@ const rotas = createBrowserRouter([
       { element: <AdminProtectedRoute />, children: [
           { path: 'admin/dashboard', element: <Dashboard /> },
           { path: 'admin/vagas', element: <GerenciarVagas /> },
+          { path: 'admin/vagas/:vagaId/editar', element: <EditarVagaAdmin /> }, // Adicionar a nova rota de edição
           { path: 'admin/candidaturas', element: <GerenciarCandidaturas /> },
+          { path: 'admin/empresas/criar', element: <CriarEmpresaAdmin /> }, // Adicionar a nova rota de criação
+          { path: 'admin/empresas', element: <GerenciarEmpresas /> }, // Adicionar a nova rota
+          { path: 'admin/empresas/:id/editar', element: <EditarEmpresaAdmin /> }, // Adicionar a nova rota
       ]}
     ],
   },

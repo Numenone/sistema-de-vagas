@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useUsuarioStore } from './context/UsuarioContext';
 import type { VagaType } from './utils/VagaType';
-import CardVaga from './component/CardVaga';
+import { CardVaga } from './component/CardVaga';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
@@ -10,7 +10,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 export default function MinhasVagasFavoritas() {
     const [vagas, setVagas] = useState<VagaType[]>([]);
     const [loading, setLoading] = useState(true);
-    const { fetchAutenticado } = useUsuarioStore() as any;
+    const { fetchAutenticado } = useUsuarioStore();
 
     useEffect(() => {
         async function fetchFavoritos() {
@@ -26,7 +26,7 @@ export default function MinhasVagasFavoritas() {
             }
         }
         fetchFavoritos();
-    }, []);
+    }, [fetchAutenticado]);
 
     if (loading) {
         return <div className="p-6 text-center">Carregando...</div>;

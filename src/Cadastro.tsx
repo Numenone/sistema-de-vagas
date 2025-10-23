@@ -14,7 +14,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function Cadastro() {
   const { register, handleSubmit } = useForm<Inputs>();
-  const { logaUsuario, fetchFavoritos } = useUsuarioStore();
+  const { logaUsuario } = useUsuarioStore();
   const navigate = useNavigate();
   async function onSubmit(data: Inputs) {
     if (data.senha !== data.confirmarSenha) {
@@ -37,7 +37,7 @@ export default function Cadastro() {
       });
 
       if (response.status === 201) {
-        const loginResponse = await fetch(`${apiUrl}/login`, { // A rota de login está na raiz
+        const loginResponse = await fetch(`${apiUrl}/api/login`, { // A rota de login está na raiz
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: data.email, senha: data.senha }),
@@ -46,10 +46,8 @@ export default function Cadastro() {
         if (loginResponse.ok) {
           toast.success('Cadastro realizado com sucesso! Você será redirecionado.');
           const { token, usuario } = await loginResponse.json();
-          logaUsuario(usuario, token, true); // Manter conectado por padrão
-          if (usuario.tipo === 'candidato') {
-            fetchFavoritos();
-          }
+          logaUsuario(usuario, token, true);
+          
           navigate('/');
         } else {
           throw new Error('Falha ao fazer login após o cadastro.');

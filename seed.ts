@@ -23,7 +23,7 @@ async function main() {
   // Insere os dados
   // 1. Empresas
   for (const empresa of dbData.empresas) {
-    const { id, createdAt, updatedAt, ...data } = empresa;
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...data } = empresa;
     try {
       await prisma.empresa.create({ data });
     } catch (e) {
@@ -34,7 +34,7 @@ async function main() {
 
   // 2. Usuários
   for (const usuario of dbData.usuarios) {
-    const { id, createdAt, updatedAt, ...data } = usuario;
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...data } = usuario;
     try {
       await prisma.usuario.create({ data });
     } catch (e) {
@@ -45,7 +45,7 @@ async function main() {
 
   // 3. Vagas
   for (const vaga of dbData.vagas) {
-    const { id, createdAt, updatedAt, ...data } = vaga;
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...data } = vaga;
     try {
       // Garante que o salário é um número
       data.salario = Number(data.salario);
@@ -58,7 +58,7 @@ async function main() {
 
   // 4. Candidaturas
   for (const candidatura of dbData.candidaturas) {
-    const { id, createdAt, updatedAt, ...data } = candidatura;
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...data } = candidatura;
     try {
       // Garante que os IDs são números
       data.usuarioId = Number(data.usuarioId);

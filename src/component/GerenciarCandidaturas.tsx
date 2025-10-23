@@ -1,110 +1,147 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useUsuarioStore } from '../context/UsuarioContext';
 import type { CandidaturaType } from '../utils/CandidaturaType';
+import { Search, Filter } from 'lucide-react';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
+const STATUS_CANDIDATURA = ['Enviada', 'Em Análise', 'Aprovada', 'Rejeitada'] as const;
+type StatusCandidatura = typeof STATUS_CANDIDATURA[number];
+
+const statusStyles: Record<StatusCandidatura, string> = {
+  Enviada: 'bg-blue-100 text-blue-800 border-blue-200',
+  'Em Análise': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  Aprovada: 'bg-green-100 text-green-800 border-green-200',
+  Rejeitada: 'bg-red-100 text-red-800 border-red-200',
+};
+
+
+
 export default function GerenciarCandidaturas() {
   const [candidaturas, setCandidaturas] = useState<CandidaturaType[]>([]);
-  
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState('todas');
+  const { fetchAutenticado } = useUsuarioStore();
+
   useEffect(() => {
-    fetchCandidaturas();
-  }, []);
+    async function fetchCandidaturas() {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('search', searchTerm);
+        if (filtroStatus !== 'todas') params.append('status', filtroStatus);
 
-  const fetchCandidaturas = async () => {
-    try {
-      // Usa o novo endpoint que já traz todos os dados relacionados
-      const response = await fetch(`${apiUrl}/api/candidaturas`);
-      if (!response.ok) {
-        throw new Error('Falha ao buscar candidaturas.');
+        const response = await fetchAutenticado(`${apiUrl}/api/candidaturas?${params.toString()}`);
+        if (!response.ok) throw new Error('Falha ao buscar candidaturas.');
+        const data = await response.json();
+        setCandidaturas(data);
+      } catch (error) {
+        toast.error('Erro ao carregar candidaturas.');
+      } finally {
+        setLoading(false);
       }
-      const dados = await response.json();
-      if (Array.isArray(dados)) {
-        setCandidaturas(dados);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar candidaturas:', error);
-      toast.error('Erro ao carregar candidaturas.');
     }
-  };
 
-  const atualizarStatus = async (candidaturaId: number, novoStatus: string) => {
+    const handler = setTimeout(() => {
+      fetchCandidaturas();
+    }, 300); // Debounce para a busca
+
+    return () => clearTimeout(handler);
+  }, [fetchAutenticado, searchTerm, filtroStatus]);
+
+  async function handleStatusChange(candidaturaId: number, newStatus: StatusCandidatura) {
     try {
-      // Usa o novo endpoint para atualizar o status
-      const response = await fetch(`${apiUrl}/api/candidaturas/${candidaturaId}`, {
+      const response = await fetchAutenticado(`${apiUrl}/api/candidaturas/${candidaturaId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: novoStatus }) // O backend cuida do updatedAt
+        body: JSON.stringify({ status: newStatus }),
       });
-      if (response.ok) {
-        toast.success('Status atualizado!');
-        fetchCandidaturas();
-      } else {
-        throw new Error('Falha ao atualizar status.');
-      }
+
+      if (!response.ok) throw new Error('Falha ao atualizar status.');
+
+      toast.success('Status da candidatura atualizado!');
+      setCandidaturas(prev =>
+        prev.map(cand => (cand.id === candidaturaId ? { ...cand, status: newStatus } : cand))
+      );
     } catch (error) {
-      toast.error('Erro ao atualizar status');
-      console.error('Erro ao atualizar status:', error);
+      toast.error('Erro ao atualizar status da candidatura.');
     }
-  };
+  }
+
+  if (loading) {
+    return <div className="p-6 text-center">Carregando candidaturas...</div>;
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Gerenciar Candidaturas</h1>
-
-      <div className="card">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th>Vaga</th>
-                <th>Candidato</th>
-                <th>Mensagem</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {candidaturas.map(candidatura => (
-                <tr key={candidatura.id}>
-                  <td className="align-top">
-                    <div className="font-bold">{candidatura.vaga.titulo}</div>
-                    <div className="text-sm text-gray-600">{candidatura.vaga.empresa.nome}</div>
-                  </td>
-                  <td className="align-top">
-                    <div>{candidatura.usuario.nome}</div>
-                    <div className="text-sm text-gray-600">{candidatura.usuario.email}</div>
-                  </td>
-                  <td className="max-w-xs">{candidatura.descricao}</td>
-                  <td>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      candidatura.status === 'aprovada' ? 'bg-green-100 text-green-800' :
-                      candidatura.status === 'rejeitada' ? 'bg-red-100 text-red-800' :
-                      candidatura.status === 'visualizada' ? 'bg-blue-100 text-blue-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {candidatura.status}
-                    </span>
-                  </td>
-                  <td className="align-top">
-                    <div className="flex flex-col gap-2">
-                      <button onClick={() => atualizarStatus(candidatura.id, 'visualizada')} className="btn-secondary text-xs">
-                        Visualizar
-                      </button>
-                      <button onClick={() => atualizarStatus(candidatura.id, 'aprovada')} className="btn-success text-xs">
-                        Aprovar
-                      </button>
-                      <button onClick={() => atualizarStatus(candidatura.id, 'rejeitada')} className="btn-danger text-xs">
-                        Rejeitar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <h1 className="text-3xl font-bold mb-6">Gerenciar Candidaturas</h1>
+      {/* Filtros */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Buscar por candidato, vaga ou empresa..."
+            className="form-input pl-10 w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <select
+            className="form-input pl-10 w-full"
+            value={filtroStatus}
+            onChange={(e) => setFiltroStatus(e.target.value)}
+          >
+            <option value="todas">Todos os Status</option>
+            {STATUS_CANDIDATURA.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
         </div>
       </div>
-    </div>
-  );
-}
+
+      {/* Tabela de Candidaturas */}
+      <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidato</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vaga</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {candidaturas.map(c => (
+              <tr key={c.id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{c.usuario.nome}</div>
+                  <div className="text-sm text-gray-500">{c.usuario.email}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{c.vaga.titulo}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{c.vaga.empresa.nome}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(c.createdAt).toLocaleDateString('pt-BR')}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <select
+                    value={c.status}
+                    onChange={(e) => handleStatusChange(c.id, e.target.value as StatusCandidatura)}
+                    className={`form-input py-1 text-sm border-2 ${statusStyles[c.status as StatusCandidatura]}`}
+                  >
+                    {STATUS_CANDIDATURA.map(status => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+      </div>
+)}

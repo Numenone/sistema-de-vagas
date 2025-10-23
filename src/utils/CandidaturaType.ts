@@ -6,7 +6,7 @@ export type CandidaturaType = {
     usuarioId: number
     vagaId: number
     descricao: string
-    status: 'pendente' | 'visualizada' | 'aprovada' | 'rejeitada'
+    status: 'Enviada' | 'Em Análise' | 'Aprovada' | 'Rejeitada'
     createdAt: string
     updatedAt: string | null
     vaga: VagaType

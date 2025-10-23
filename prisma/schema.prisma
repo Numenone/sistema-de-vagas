@@ -1,77 +1,134 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Este é o seu arquivo de schema do Prisma.
+// Saiba mais sobre ele na documentação: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url      = env("DATABASE_URL")
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
+// --- Modelos de Dados ---
+
 model Usuario {
-  id           Int            @id @default(autoincrement())
-  nome         String
-  email        String         @unique
-  senha        String
-  tipo         String // candidato, lider, admin
-  empresaId    Int?
-  fotoPerfil   String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id                   Int           @id @default(autoincrement())
+  nome                 String
+  email                String        @unique
+  senha                String
+  tipo                 String // "candidato", "lider", "admin"
+  fotoPerfil           String?
+  ativo                Boolean       @default(true)
+  empresaId            Int?
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
 
-  empresa      Empresa?       @relation(fields: [empresaId], references: [id])
-  candidaturas Candidatura[]
-  vagasFavoritas Vaga[]         @relation("VagasFavoritas")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  empresa       Empresa?      @relation(fields: [empresaId], references: [id])
+  candidaturas  Candidatura[]
+  vagasFavoritas Vaga[]        @relation("VagasFavoritas")
+  atividades    Atividade[]
+  mensagensEnviadas  Mensagem[] @relation("MensagensEnviadas")
+  mensagensRecebidas Mensagem[] @relation("MensagensRecebidas")
+
+  @@index([empresaId])
 }
 
 model Empresa {
-  id        Int       @id @default(autoincrement())
-  nome      String
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
   descricao String
-  logo      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  lideres   Usuario[]
-  vagas     Vaga[]
+  logo      String?
+  ativo     Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lideres Usuario[]
+  vagas   Vaga[]
 }
 
 model Vaga {
-  id           Int           @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   titulo       String
   descricao    String
   requisitos   String
   salario      Float
-  ativa        Boolean       @default(true)
-  modalidade   String        @default("Presencial")
-  tipoContrato String        @default("CLT")
+  modalidade   String
+  tipoContrato String
+  ativa        Boolean  @default(true)
   empresaId    Int
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  empresa      Empresa       @relation(fields: [empresaId], references: [id])
-  candidaturas Candidatura[]
-  favoritedBy  Usuario[]     @relation("VagasFavoritas")
-  habilidades  Habilidade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  empresa       Empresa       @relation(fields: [empresaId], references: [id])
+  candidaturas  Candidatura[]
+  favoritadoPor Usuario[]     @relation("VagasFavoritas")
+  habilidades   Habilidade[]
+  atividades    Atividade[]
+
+  @@index([empresaId])
 }
 
 model Candidatura {
-  id          Int      @id @default(autoincrement())
-  usuarioId   Int
-  vagaId      Int
-  descricao   String
-  status      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
-  vaga        Vaga     @relation(fields: [vagaId], references: [id])
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  vagaId    Int
+  descricao String   @default("")
+  status    String   @default("Enviada") // "Enviada", "Em Análise", "Aprovada", "Rejeitada"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  vaga    Vaga    @relation(fields: [vagaId], references: [id])
+  mensagens Mensagem[]
+
+  @@unique([usuarioId, vagaId], name: "unique_candidatura")
+  @@index([usuarioId])
+  @@index([vagaId])
 }
 
 model Habilidade {
   id    Int    @id @default(autoincrement())
   nome  String @unique
   vagas Vaga[]
+}
+
+model Atividade {
+  id        Int      @id @default(autoincrement())
+  tipo      String // "NOVA_VAGA", "NOVA_CANDIDATURA"
+  usuarioId Int?
+  vagaId    Int?
+
+  createdAt DateTime @default(now())
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+  vaga    Vaga?    @relation(fields: [vagaId], references: [id])
+
+  @@index([usuarioId])
+  @@index([vagaId])
+}
+
+model Mensagem {
+  id             Int      @id @default(autoincrement())
+  conteudo       String
+  remetenteId    Int
+  destinatarioId Int
+  candidaturaId  Int
+  lida           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  remetente    Usuario     @relation("MensagensEnviadas", fields: [remetenteId], references: [id])
+  destinatario Usuario     @relation("MensagensRecebidas", fields: [destinatarioId], references: [id])
+  candidatura  Candidatura @relation(fields: [candidaturaId], references: [id])
+
+  @@index([remetenteId])
+  @@index([destinatarioId])
+  @@index([candidaturaId])
 }

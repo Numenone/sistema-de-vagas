@@ -13,7 +13,7 @@ type Inputs = {
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function EditarPerfil() {
-  const { usuario, logaUsuario } = useUsuarioStore();
+  const { usuario, token, logaUsuario, fetchAutenticado } = useUsuarioStore();
   const { register, handleSubmit, formState: { isDirty }, watch } = useForm<Inputs>({
     defaultValues: {
       nome: usuario.nome,
@@ -49,17 +49,16 @@ export default function EditarPerfil() {
     }
 
     try {
-      const response = await fetch(`${apiUrl}/api/usuarios/${usuario.id}`, {
+      const response = await fetchAutenticado(`${apiUrl}/api/usuarios/${usuario.id}`, {
         method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${usuario.token}`,
-        },
         body: formData,
       });
 
       if (response.ok) {
         const usuarioAtualizado = await response.json();
-        logaUsuario(usuarioAtualizado);
+        if (token) {
+          logaUsuario(usuarioAtualizado, token, true);
+        }
         toast.success('Perfil atualizado com sucesso!');
         navigate('/');
       } else {
@@ -77,13 +76,10 @@ export default function EditarPerfil() {
       <div className="card">
         <div className="flex items-center gap-4 mb-6">
           <img 
-            src={
-              fotoAssistida && fotoAssistida.length > 0
-                ? URL.createObjectURL(fotoAssistida[0])
-                : usuario.fotoPerfil 
-                  ? usuario.fotoPerfil
-                  : `https://ui-avatars.com/api/?name=${usuario.nome}&background=random`
-            } 
+            src={fotoAssistida && fotoAssistida.length > 0
+              ? URL.createObjectURL(fotoAssistida[0])
+              : usuario.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(usuario.nome)}&background=random`
+            }
             alt="Foto de perfil" 
             className="w-24 h-24 rounded-full object-cover"
           />

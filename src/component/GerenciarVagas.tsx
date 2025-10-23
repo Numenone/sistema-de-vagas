@@ -1,11 +1,12 @@
 /// <reference types="vite/client" />
 
 import { useEffect, useState } from 'react';
-import { useForm, UseFormRegister, UseFormHandleSubmit, UseFormReset } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { VagaType } from '../utils/VagaType';
 import type { EmpresaType } from '../utils/EmpresaType';
 import { useUsuarioStore } from '../context/UsuarioContext';
+import { Link } from 'react-router-dom';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -22,20 +23,28 @@ type Inputs = {
 export default function GerenciarVagas() {
   const [vagas, setVagas] = useState<VagaType[]>([]);
   const [empresas, setEmpresas] = useState<EmpresaType[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const { register, handleSubmit, reset } = useForm<Inputs>(); // Removed fetchAutenticado from here
   const { fetchAutenticado } = useUsuarioStore(); // Correctly get fetchAutenticado from useUsuarioStore
 
   useEffect(() => {
     fetchVagas();
     fetchEmpresas();
-  }, []);
+  }, [searchTerm]); // Re-executa quando o termo de busca muda
 
   const fetchVagas = async () => {
     try {
-      // Usa o novo endpoint, pedindo todas as vagas (ativas e inativas)
-      const response = await fetchAutenticado(`${apiUrl}/api/vagas?status=all`);
+      const params = new URLSearchParams();
+      // Pede todas as vagas (ativas e inativas) para o painel de admin
+      params.append('status', 'all');
+      // Adiciona o termo de busca se ele existir
+      if (searchTerm) {
+        params.append('adminSearch', searchTerm);
+      }
+
+      const response = await fetchAutenticado(`${apiUrl}/api/vagas?${params.toString()}`);
       if (!response.ok) throw new Error('Falha ao buscar vagas.');
-      const dados = await response.json(); // A resposta agora é um objeto com { vagas, ... }
+      const dados = await response.json();
       if (Array.isArray(dados.vagas)) {
         setVagas(dados.vagas);
       }
@@ -132,34 +141,48 @@ export default function GerenciarVagas() {
         <button type="submit" className="btn-primary">Criar Vaga</button>
       </form>
 
+      <div className="mb-6">
+        <h2 className="text-xl font-bold mb-4">Buscar Vagas</h2>
+        <input
+          type="text"
+          placeholder="Buscar por título ou nome da empresa..."
+          className="form-input w-full md:w-1/2"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
       <div className="card">
         <h2 className="text-xl font-bold mb-4">Vagas Cadastradas</h2>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <th>Título</th>
-                <th>Empresa</th>
-                <th>Salário</th>
-                <th>Status</th>
-                <th>Ações</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salário</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white divide-y divide-gray-200">
               {vagas.map(vaga => (
                 <tr key={vaga.id}>
-                  <td>{vaga.titulo}</td>
-                  <td>{vaga.empresa?.nome}</td>
-                  <td>R$ {vaga.salario.toLocaleString('pt-BR')}</td>
-                  <td>
-                    <span className={`px-2 py-1 rounded ${vaga.ativa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{vaga.titulo}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vaga.empresa?.nome}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {vaga.salario.toLocaleString('pt-BR')}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${vaga.ativa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {vaga.ativa ? 'Ativa' : 'Inativa'}
                     </span>
                   </td>
-                  <td>
-                    <button onClick={() => toggleVagaStatus(vaga)} className="btn-secondary">
-                      {vaga.ativa ? 'Desativar' : 'Ativar'}
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex gap-2">
+                      <button onClick={() => toggleVagaStatus(vaga)} className="btn-secondary">
+                        {vaga.ativa ? 'Desativar' : 'Ativar'}
+                      </button>
+                      <Link to={`/admin/vagas/${vaga.id}/editar`} className="btn-primary">Editar</Link>
+                    </div>
                   </td>
                 </tr>
               ))}

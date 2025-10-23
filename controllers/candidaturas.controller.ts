@@ -1,54 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
-import * as CandidaturaService from '../services/candidatura.service.ts';
+import * as CandidaturaService from '../services/candidatura.service';
 
-export const getAllCandidaturas = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const candidaturas = await CandidaturaService.getAll(req.query);
-    res.json(candidaturas);
-  } catch (error) {
-    next(error);
+export const getAllCandidaturasByEmpresa = async (req: Request, res: Response) => {
+  if (req.usuario?.tipo !== 'lider' || !req.usuario.empresaId) {
+    return res.status(403).json({ error: 'Acesso negado. Rota exclusiva para líderes de empresa.' });
   }
+  const query = { ...req.query, empresaId: req.usuario.empresaId };
+  const candidaturas = await CandidaturaService.getAll(query);
+  res.json(candidaturas);
 };
 
-export const getCandidaturaById = async (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.params;
-  try {
-    const candidatura = await CandidaturaService.getById(Number(id));
-    if (candidatura) {
-      res.json(candidatura);
-    } else {
-      res.status(404).json({ error: 'Candidatura não encontrada' });
-    }
-  } catch (error) {
-    next(error);
+export const getAllCandidaturasByUsuario = async (req: Request, res: Response) => {
+  if (req.usuario?.id !== Number(req.params.usuarioId)) {
+    return res.status(403).json({ error: 'Acesso negado.' });
   }
+  const candidaturas = await CandidaturaService.getAll({ ...req.query, usuarioId: req.usuario.id });
+  res.json(candidaturas);
 };
 
-export const createCandidatura = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const novaCandidatura = await CandidaturaService.create(req.body);
-    res.status(201).json(novaCandidatura);
-  } catch (error) {
-    next(error);
-  }
+export const getAllCandidaturas = async (req: Request, res: Response) => {
+  const candidaturas = await CandidaturaService.getAll(req.query);
+  res.json(candidaturas);
 };
 
-export const updateCandidatura = async (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.params;
-  try {
-    const candidaturaAtualizada = await CandidaturaService.update(Number(id), req.body);
-    res.json(candidaturaAtualizada);
-  } catch (error) {
-    next(error);
-  }
+export const createCandidatura = async (req: Request, res: Response) => {
+  const novaCandidatura = await CandidaturaService.create(req.body);
+  res.status(201).json(novaCandidatura);
 };
 
-export const deleteCandidatura = async (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.params;
-  try {
-    await CandidaturaService.remove(Number(id));
-    res.status(204).send();
-  } catch (error) {
-    next(error);
+export const updateCandidatura = async (req: Request, res: Response) => {
+  if (req.usuario?.tipo !== 'admin' && req.usuario?.tipo !== 'lider') {
+    return res.status(403).json({ error: 'Acesso negado.' });
   }
+  const candidaturaAtualizada = await CandidaturaService.update(Number(req.params.id), req.body);
+  res.json(candidaturaAtualizada);
 };

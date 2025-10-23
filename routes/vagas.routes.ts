@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticateToken } from '../auth.middleware';
+import { authenticateToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // --- GET /api/vagas (Listar vagas com filtros e paginação) ---
 router.get('/', async (req, res) => {
-    const { q, salario, empresaNome, status, page = '1', limit = '6', empresaId, modalidade, tipoContrato, habilidades } = req.query;
+    const { q, salario, empresaNome, status, page = '1', limit = '10', empresaId, modalidade, tipoContrato, habilidades, adminSearch } = req.query;
 
     try {
         const pageNum = parseInt(page as string, 10);
@@ -16,7 +16,8 @@ router.get('/', async (req, res) => {
 
         const where: any = {};
 
-        if (status !== 'all') {
+        // O filtro de admin ignora o status 'ativa', a menos que seja especificado
+        if (status !== 'all' && !adminSearch) {
             where.ativa = true;
         }
 
@@ -24,11 +25,20 @@ router.get('/', async (req, res) => {
             where.empresaId = Number(empresaId);
         }
 
+        // Filtro de busca principal (página inicial)
         if (q && typeof q === 'string') {
             where.OR = [
                 { titulo: { contains: q, mode: 'insensitive' } },
                 { descricao: { contains: q, mode: 'insensitive' } },
                 { requisitos: { contains: q, mode: 'insensitive' } },
+            ];
+        }
+
+        // Filtro de busca específico para a página de admin
+        if (adminSearch && typeof adminSearch === 'string') {
+            where.OR = [
+                { titulo: { contains: adminSearch, mode: 'insensitive' } },
+                { empresa: { nome: { contains: adminSearch, mode: 'insensitive' } } },
             ];
         }
 
@@ -156,21 +166,38 @@ router.get('/:id', async (req, res) => {
 // --- PATCH /api/vagas/:id (Atualizar vaga) ---
 router.patch('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    const { ativa } = req.body;
+    const { titulo, descricao, requisitos, salario, modalidade, tipoContrato, ativa } = req.body;
 
     try {
         if (req.usuario?.tipo === 'lider') {
             const vaga = await prisma.vaga.findUnique({ where: { id: Number(id) } });
             if (vaga?.empresaId !== req.usuario.empresaId) {
-                return res.status(403).json({ error: 'Você não tem permissão para editar esta vaga.' });
+                return res.status(403).json({ error: 'Acesso negado para editar esta vaga.' });
             }
         } else if (req.usuario?.tipo !== 'admin') {
             return res.status(403).json({ error: 'Acesso negado.' });
         }
 
+        const dataToUpdate: any = {};
+
+        // Admin e Líder podem alterar o status
+        if (typeof ativa === 'boolean') {
+            dataToUpdate.ativa = ativa;
+        }
+
+        // Apenas Admin pode alterar os outros campos
+        if (req.usuario?.tipo === 'admin') {
+            if (titulo) dataToUpdate.titulo = titulo;
+            if (descricao) dataToUpdate.descricao = descricao;
+            if (requisitos) dataToUpdate.requisitos = requisitos;
+            if (salario) dataToUpdate.salario = Number(salario);
+            if (modalidade) dataToUpdate.modalidade = modalidade;
+            if (tipoContrato) dataToUpdate.tipoContrato = tipoContrato;
+        }
+
         const vagaAtualizada = await prisma.vaga.update({
             where: { id: Number(id) },
-            data: { ativa },
+            data: dataToUpdate,
         });
         res.json(vagaAtualizada);
     } catch (error) {

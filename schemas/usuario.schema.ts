@@ -2,10 +2,10 @@ import { z } from 'zod';
 
 export const createUsuarioSchema = z.object({
   body: z.object({
-    nome: z.string({ required_error: 'O nome é obrigatório.' }),
-    email: z.string({ required_error: 'O email é obrigatório.' }).email('Formato de email inválido.'),
-    senha: z.string({ required_error: 'A senha é obrigatória.' }).min(6, 'A senha deve ter no mínimo 6 caracteres.'),
-    tipo: z.enum(['candidato', 'lider', 'admin'], { required_error: 'O tipo é obrigatório.' }),
+    nome: z.string().refine(val => val !== null && val !== undefined && val.trim() !== '', { message: 'O nome é obrigatório.' }),
+    email: z.string().email('Formato de email inválido.').refine(val => val !== null && val !== undefined && val.trim() !== '', { message: 'O email é obrigatório.' }),
+    senha: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres.').refine(val => val !== null && val !== undefined && val.trim() !== '', { message: 'A senha é obrigatória.' }),
+    tipo: z.enum(['candidato', 'lider', 'admin']).refine(val => val !== null && val !== undefined, { message: 'O tipo é obrigatório.' }),
     empresaId: z.number().int().optional(),
   }),
 });

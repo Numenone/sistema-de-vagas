@@ -35,7 +35,7 @@ export default function Login() {
                 // O backend não deve retornar a senha.
                 // Se retornar, é uma boa prática removê-la aqui.
                 // delete usuario.senha; // A senha não deve ser retornada pelo backend
-                logaUsuario({ ...usuario, token });
+                logaUsuario(usuario, token, data.manter);
                 if (usuario.tipo === 'candidato') {
                     fetchFavoritos(); // Busca os favoritos após o login
                 }

@@ -1,125 +1,125 @@
 import type { VagaType } from './VagaType';
 import type { CandidaturaType } from './CandidaturaType';
-import { Briefcase, UserPlus } from 'lucide-react';
+import { Briefcase, FileText } from 'lucide-react';
 
-export type PieChartData = { x: string; y: number; name: string };
-export type BarChartData = { x: string; y: number; label: string };
+// --- Tipos de Dados ---
+
+export type PieChartData = {
+  x: string;
+  y: number;
+  name: string;
+};
+
+export type BarChartData = {
+  x: string;
+  y: number;
+};
 
 export type ChartData = {
   porEmpresa: PieChartData[];
   porStatus: PieChartData[];
   porSalario: PieChartData[];
   topVagas: BarChartData[];
+  porModalidade: PieChartData[];
 };
 
 export type TimelineItem = {
   id: string;
   type: 'vaga' | 'candidatura';
-  date: Date;
-  Icon: React.ElementType;
+  date: string;
   text: string;
+  Icon: React.ElementType;
 };
 
-export function processVagasPorEmpresa(vagas: VagaType[]): PieChartData[] {
-  const countMap = new Map<string, number>();
-  vagas.forEach(vaga => {
-    const nomeEmpresa = vaga.empresa?.nome || 'Sem Empresa';
-    countMap.set(nomeEmpresa, (countMap.get(nomeEmpresa) || 0) + 1);
-  });
-  return Array.from(countMap.entries()).map(([nome, count]) => ({
+// --- Funções de Processamento ---
+
+export const processVagasPorEmpresa = (vagas: VagaType[]): PieChartData[] => {
+  const contagem = vagas.reduce((acc, vaga) => {
+    const nomeEmpresa = vaga.empresa?.nome || 'N/A';
+    acc[nomeEmpresa] = (acc[nomeEmpresa] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return Object.entries(contagem).map(([nome, total]) => ({
     x: nome,
-    y: count,
-    name: `${nome} (${count})`
+    y: total,
+    name: `${nome}: ${total}`,
   }));
-}
-
-export function processCandidaturasPorStatus(candidaturas: CandidaturaType[]): PieChartData[] {
-  const countMap = new Map<string, number>();
-  candidaturas.forEach(candidatura => {
-    const status = candidatura.status || 'indefinido';
-    countMap.set(status, (countMap.get(status) || 0) + 1);
-  });
-  return Array.from(countMap.entries()).map(([status, count]) => ({
-    x: status,
-    y: count,
-    name: `${status} (${count})`
-  }));
-}
-
-const faixasSalariais: Record<string, (s: number) => boolean> = {
-  'Até R$3k': (s) => s <= 3000,
-  'R$3k - R$6k': (s) => s > 3000 && s <= 6000,
-  'R$6k - R$10k': (s) => s > 6000 && s <= 10000,
-  'Acima de R$10k': (s) => s > 10000,
 };
 
-export function processVagasPorSalario(vagas: VagaType[]): PieChartData[] {
-  const countMap = new Map<string, number>();
-  vagas.forEach(vaga => {
-    for (const faixa in faixasSalariais) {
-      if (vaga.salario && faixasSalariaisfaixa) {
-        countMap.set(faixa, (countMap.get(faixa) || 0) + 1);
-        break;
-      }
-    }
-  });
-  return Array.from(countMap.entries()).map(([faixa, count]) => ({
-    x: faixa,
-    y: count,
-    name: `${faixa} (${count})`
+export const processCandidaturasPorStatus = (candidaturas: CandidaturaType[]): PieChartData[] => {
+  const contagem = candidaturas.reduce((acc, candidatura) => {
+    acc[candidatura.status] = (acc[candidatura.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return Object.entries(contagem).map(([status, total]) => ({
+    x: status,
+    y: total,
+    name: `${status}: ${total}`,
   }));
-}
+};
 
-export function processTopVagas(candidaturas: CandidaturaType[], vagas: VagaType[]): BarChartData[] {
-  const vagasMap = new Map(vagas.map(v => [v.id, v]));
-  const countMap = new Map<string, number>();
+export const processVagasPorSalario = (vagas: VagaType[]): PieChartData[] => {
+  const faixas = {
+    'Até R$3k': (v: VagaType) => v.salario <= 3000,
+    'R$3k - R$6k': (v: VagaType) => v.salario > 3000 && v.salario <= 6000,
+    'R$6k - R$10k': (v: VagaType) => v.salario > 6000 && v.salario <= 10000,
+    'Acima de R$10k': (v: VagaType) => v.salario > 10000,
+  };
 
-  candidaturas.forEach(candidatura => {
-    const vaga = vagasMap.get(candidatura.vagaId);
-    if (vaga) {
-      countMap.set(vaga.titulo, (countMap.get(vaga.titulo) || 0) + 1);
-    }
-  });
+  const contagem = Object.keys(faixas).reduce((acc, faixa) => {
+    acc[faixa] = vagas.filter(faixas[faixa as keyof typeof faixas]).length;
+    return acc;
+  }, {} as Record<string, number>);
 
-  return Array.from(countMap.entries())
-    .sort(([, countA], [, countB]) => countB - countA)
+  return Object.entries(contagem).map(([faixa, total]) => ({
+    x: faixa,
+    y: total,
+    name: `${faixa}: ${total}`,
+  }));
+};
+
+export const processTopVagas = (candidaturas: CandidaturaType[], vagas: VagaType[]): BarChartData[] => {
+  const contagem = candidaturas.reduce((acc, cand) => {
+    acc[cand.vagaId] = (acc[cand.vagaId] || 0) + 1;
+    return acc;
+  }, {} as Record<number, number>);
+
+  return Object.entries(contagem)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
-    .map(([titulo, count]) => {
-      const nomeCurto = titulo.length > 15 ? `${titulo.substring(0, 15)}...` : titulo;
-      return { x: nomeCurto, y: count, label: `${nomeCurto}\n(${count})` };
+    .map(([vagaId, total]) => {
+      const vaga = vagas.find(v => v.id === Number(vagaId));
+      return { x: vaga?.titulo.substring(0, 15) + '...' || `Vaga ${vagaId}`, y: total };
     });
-}
+};
 
-export function processTimeline(vagas: VagaType[], candidaturas: CandidaturaType[]): TimelineItem[] {
-    const recentVagas = vagas.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 10);
+export const processVagasPorModalidade = (vagas: VagaType[]): PieChartData[] => {
+  const contagem = vagas.reduce((acc, vaga) => {
+    const modalidade = vaga.modalidade || 'N/A';
+    acc[modalidade] = (acc[modalidade] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
-    const vagaActivities: TimelineItem[] = recentVagas.map(vaga => ({
-      id: `vaga-${vaga.id}`,
-      type: 'vaga',
-      date: new Date(vaga.createdAt),
-      Icon: Briefcase,
-      text: `Nova vaga: "${vaga.titulo}" na ${vaga.empresa?.nome || 'empresa desconhecida'}.`
-    }));
-  
-    const candidaturaActivities: TimelineItem[] = candidaturas.map(candidatura => ({
-      id: `cand-${candidatura.id}`,
-      type: 'candidatura',
-      date: new Date(candidatura.createdAt),
-      Icon: UserPlus,
-      text: `${candidatura.usuario?.nome || 'Candidato desconhecido'} se candidatou para "${candidatura.vaga?.titulo || 'vaga desconhecida'}".`
-    }));
-  
-    return [...vagaActivities, ...candidaturaActivities]
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, 10);
-  }
+  return Object.entries(contagem).map(([modalidade, total]) => ({
+    x: modalidade,
+    y: total,
+    name: `${modalidade}: ${total}`,
+  }));
+};
 
-export function formatTimelineDate(date: Date): string {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  }
+export const processTimeline = (vagas: VagaType[], candidaturas: CandidaturaType[]): TimelineItem[] => {
+  const vagasRecentes = vagas.slice(0, 3).map(v => ({ id: `v-${v.id}`, type: 'vaga' as const, date: v.createdAt.toString(), text: `Nova vaga: ${v.titulo}`, Icon: Briefcase }));
+  const candidaturasRecentes = candidaturas.slice(0, 2).map(c => ({ id: `c-${c.id}`, type: 'candidatura' as const, date: c.createdAt, text: `${c.usuario.nome} se candidatou para ${c.vaga.titulo}`, Icon: FileText }));
+
+  return [...vagasRecentes, ...candidaturasRecentes].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
+export const formatTimelineDate = (dateString: string): string => {
+  return new Date(dateString).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};

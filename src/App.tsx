@@ -5,6 +5,7 @@ import type { VagaType } from "./utils/VagaType";
 import { FeedAtividades } from "./component/FeedAtividades"; 
 import type { HabilidadeType } from "./utils/HabilidadeType";
 import React from 'react'
+import { PaginationControls } from "./component/PaginationControls";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -23,7 +24,7 @@ export default function App() {
     habilidades: [] as string[],
   });
 
-  const [debouncedTerm, setDebouncedTerm] = useState("");
+  
   const [empresas, setEmpresas] = useState<string[]>([]);
   const [habilidades, setHabilidades] = useState<HabilidadeType[]>([]);
 
@@ -228,6 +229,7 @@ export default function App() {
               Limpar Filtros
             </button>
           </div>
+        </div>
 
           {loading ? (
               <div className="text-center py-12">
@@ -271,6 +273,7 @@ export default function App() {
             <FeedAtividades />
           </div>
         </div>
+          )}
       </section>
 
       <section className="bg-white py-12">
@@ -292,37 +295,5 @@ export default function App() {
         </div>
       </section>
     </div>
-  );
-}
-
-// Componente para os controles de paginação
-function PaginationControls({ currentPage, totalPages, onPageChange }: { currentPage: number, totalPages: number, onPageChange: (page: number) => void }) {
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
-
-  return (
-    <nav className="flex items-center gap-2">
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Anterior
-      </button>
-      {pageNumbers.map(number => (
-        <button key={number} onClick={() => onPageChange(number)} className={`px-4 py-2 rounded-md text-sm ${currentPage === number ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}>
-          {number}
-        </button>
-      ))}
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Próxima
-      </button>
-    </nav>
   );
 }

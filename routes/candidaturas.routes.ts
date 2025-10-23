@@ -1,21 +1,24 @@
 import { Router } from 'express';
-import {
-  getAllCandidaturas,
-  getCandidaturaById,
-  createCandidatura,
-  updateCandidatura,
-  deleteCandidatura,
-} from '../controllers/candidaturas.controller.ts';
-import { validate } from '../middlewares/validate.ts';
-import { createCandidaturaSchema, updateCandidaturaSchema } from '../schemas/candidatura.schema.ts';
+import { authenticateToken } from '../middlewares/auth.middleware';
+import * as candidaturasController from '../controllers/candidaturas.controller';
+import { validate } from '../middlewares/validate';
+import { createCandidaturaSchema, updateCandidaturaSchema } from '../schemas/candidatura.schema';
 
-const candidaturasRouter = Router();
+const router = Router();
 
-candidaturasRouter.get('/', getAllCandidaturas);
-candidaturasRouter.get('/:id', getCandidaturaById);
-candidaturasRouter.post('/', validate(createCandidaturaSchema), createCandidatura);
-candidaturasRouter.put('/:id', validate(createCandidaturaSchema), updateCandidatura);
-candidaturasRouter.patch('/:id', validate(updateCandidaturaSchema), updateCandidatura);
-candidaturasRouter.delete('/:id', deleteCandidatura);
+// Rota para o LÍDER ver as candidaturas da sua empresa
+router.get('/empresa', authenticateToken, candidaturasController.getAllCandidaturasByEmpresa);
 
-export default candidaturasRouter;
+// Rota para o CANDIDATO ver suas próprias candidaturas
+router.get('/usuario/:usuarioId', authenticateToken, candidaturasController.getAllCandidaturasByUsuario);
+
+// Rota para o ADMIN ver TODAS as candidaturas (usada em GerenciarCandidaturas)
+router.get('/', authenticateToken, candidaturasController.getAllCandidaturas);
+
+// Rota para criar uma candidatura
+router.post('/', authenticateToken, validate(createCandidaturaSchema), candidaturasController.createCandidatura);
+
+// Rota para atualizar o status de uma candidatura (usada pelo Admin e Líder)
+router.patch('/:id', authenticateToken, validate(updateCandidaturaSchema), candidaturasController.updateCandidatura);
+
+export default router;

@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "node --loader ts-node/esm --watch server.ts",
-    "start": "concurrently \"npm run server\" \"npm run dev\"",
-    "build": "prisma generate && prisma migrate deploy && vite build",
-    "preview": "vite preview"
+    "start": "ts-node-dev --respawn --transpile-only server.ts",
+    "build": "tsc && vite build",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy && npm run build"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
@@ -18,12 +18,15 @@
     "lucide-react": "^0.408.0",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
+    "pusher": "^5.2.0",
+    "pusher-js": "^8.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.65.0",
     "react-router-dom": "^6.20.1",
     "sonner": "^1.7.4",
     "victory": "^37.3.6",
+    "zod": "^4.1.12",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
@@ -40,6 +43,7 @@
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "eslint": "^8.53.0",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
     "express": "^4.21.2",

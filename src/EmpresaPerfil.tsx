@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { CardVaga } from './component/CardVaga';
 import type { EmpresaType } from './utils/EmpresaType';
 import type { VagaType } from './utils/VagaType';
+import { useUsuarioStore } from './context/UsuarioContext';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -15,6 +16,7 @@ export default function EmpresaPerfil() {
     const { id } = useParams();
     const [empresa, setEmpresa] = useState<EmpresaComVagas | null>(null);
     const [loading, setLoading] = useState(true);
+    const { usuario } = useUsuarioStore();
 
     useEffect(() => {
         async function fetchEmpresa() {
@@ -46,13 +48,18 @@ export default function EmpresaPerfil() {
         <div className="max-w-7xl mx-auto p-6">
             <div className="card mb-8 flex flex-col md:flex-row items-center gap-8">
                 <img 
-                    src={empresa.logo} 
+                    src={empresa.logo || "https://via.placeholder.com/160x160?text=Logo"} 
                     alt={`Logo da ${empresa.nome}`} 
                     className="w-40 h-40 object-contain border p-2 rounded-lg bg-white"
                 />
                 <div>
                     <h1 className="text-4xl font-bold mb-2">{empresa.nome}</h1>
                     <p className="text-gray-600">{empresa.descricao}</p>
+                    {usuario.tipo === 'admin' && (
+                        <Link to={`/admin/empresas/${empresa.id}/editar`} className="btn-primary mt-4 inline-block">
+                            Editar Empresa
+                        </Link>
+                    )}
                 </div>
             </div>
 

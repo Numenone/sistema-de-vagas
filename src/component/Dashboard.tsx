@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useMemo, FC } from 'react';
-import { useUsuarioStore } from '../context/UsuarioContext';
 import { VictoryPie, VictoryLegend, VictoryLabel, VictoryChart, VictoryBar, VictoryAxis, VictoryTheme } from 'victory';
 import { 
   Briefcase, 
-  UserPlus, 
   Clock, 
   FileText,
   BarChart3,
@@ -14,13 +12,19 @@ import {
   ClipboardList
 } from 'lucide-react'; 
 import {
-  type ChartData, type TimelineItem, type PieChartData,
-  processVagasPorEmpresa, processCandidaturasPorStatus,
-  processVagasPorSalario, processTopVagas, processTimeline,
-  formatTimelineDate
+  type ChartData,
+  type TimelineItem,
+  type PieChartData,
+  processVagasPorEmpresa,
+  processCandidaturasPorStatus,
+  processVagasPorSalario,
+  processTopVagas,
+  processTimeline,
+  processVagasPorModalidade, // Adicionando a função que faltava
+  formatTimelineDate,
 } from '../utils/dashboard.utils';
 
-type ChartType = 'empresa' | 'status' | 'salario' | 'topVagas';
+type ChartType = 'empresa' | 'status' | 'salario' | 'topVagas' | 'modalidade';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -82,11 +86,11 @@ export default function Dashboard() {
     porStatus: [],
     porSalario: [],
     topVagas: [],
+    porModalidade: [],
   });
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeChart, setActiveChart] = useState<ChartType>('empresa');
-  const { usuario } = useUsuarioStore();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -108,10 +112,11 @@ export default function Dashboard() {
         const porStatus = processCandidaturasPorStatus(candidaturas);
         const porSalario = processVagasPorSalario(vagas);
         const topVagasData = processTopVagas(candidaturas, vagas);
+        const porModalidade = processVagasPorModalidade(vagas);
         const timelineItems = processTimeline(vagas, candidaturas);
 
         setTimelineItems(timelineItems);
-        setChartData({ porEmpresa, porStatus, porSalario, topVagas: topVagasData });
+        setChartData({ porEmpresa, porStatus, porSalario, topVagas: topVagasData, porModalidade });
       } catch (error) {
         console.error('Erro ao buscar estatísticas:', error);
         setError("Falha ao carregar dados do dashboard.");
@@ -149,6 +154,12 @@ export default function Dashboard() {
           data: chartData.topVagas,
           title: 'Top 5 Vagas com Mais Candidaturas',
           colorScale: 'blue',
+        };
+      case 'modalidade':
+        return {
+          data: chartData.porModalidade,
+          title: 'Vagas por Modalidade',
+          colorScale: 'qualitative',
         };
       default:
         return { data: [], title: '', colorScale: 'grayscale' };
@@ -231,6 +242,7 @@ const ChartsDisplay: FC<{ activeChart: ChartType; setActiveChart: (chart: ChartT
       <ChartButton icon={FileText} label="Candidaturas por Status" chartType="status" activeChart={activeChart} onClick={setActiveChart} />
       <ChartButton icon={Wallet} label="Vagas por Salário" chartType="salario" activeChart={activeChart} onClick={setActiveChart} />
       <ChartButton icon={BarChart3} label="Top 5 Vagas" chartType="topVagas" activeChart={activeChart} onClick={setActiveChart} />
+      <ChartButton icon={PieChart} label="Vagas por Modalidade" chartType="modalidade" activeChart={activeChart} onClick={setActiveChart} />
     </div>
 
     {chartData.data.length > 0 ? (

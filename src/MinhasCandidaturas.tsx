@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useUsuarioStore } from "./context/UsuarioContext";
 import type { CandidaturaType } from "./utils/CandidaturaType";
-import React from 'react'
+import React from 'react';
+import ChatModal from "./component/ChatModal"; // Importar o modal
+import { toast } from "sonner";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -10,7 +12,8 @@ export default function MinhasCandidaturas() {
     const [loading, setLoading] = useState(true);
     const [filtroStatus, setFiltroStatus] = useState('todas');
     const [error, setError] = useState<string | null>(null);
-    const { usuario } = useUsuarioStore();
+    const { usuario, fetchAutenticado, fetchUnreadCount } = useUsuarioStore();
+    const [chatAberto, setChatAberto] = useState<CandidaturaType | null>(null);
 
     useEffect(() => {
         async function buscaCandidaturas() {
@@ -25,9 +28,7 @@ export default function MinhasCandidaturas() {
                 }
 
                 console.log("🔄 Buscando candidaturas para usuário ID:", usuario.id);
-                
-                // Requisição única para o novo endpoint otimizado
-                const response = await fetch(`${apiUrl}/api/candidaturas/usuario/${usuario.id}?status=${filtroStatus}`);
+                const response = await fetchAutenticado(`${apiUrl}/api/candidaturas/usuario/${usuario.id}?status=${filtroStatus}`);
                 
                 if (!response.ok) {
                     throw new Error(`Erro ao buscar candidaturas: ${response.status}`);
@@ -47,7 +48,21 @@ export default function MinhasCandidaturas() {
         }
 
         buscaCandidaturas();
-    }, [usuario.id, filtroStatus]);
+    }, [usuario.id, filtroStatus, fetchAutenticado]);
+
+    async function handleOpenChat(candidatura: CandidaturaType) {
+        setChatAberto(candidatura);
+        // Marca as mensagens como lidas no backend
+        try {
+            await fetchAutenticado(`${apiUrl}/api/mensagens/candidatura/${candidatura.id}/mark-as-read`, {
+                method: 'PATCH',
+            });
+            // Atualiza a contagem de não lidas no estado global
+            fetchUnreadCount();
+        } catch (error) {
+            toast.error("Erro ao marcar mensagens como lidas.");
+        }
+    }
 
     function formatarData(data: string) {
         try {
@@ -66,28 +81,13 @@ export default function MinhasCandidaturas() {
     }
 
     const getStatusStyle = (status: string) => {
-        switch (status) {
-            case 'pendente':
-                return "bg-yellow-100 text-yellow-800 border-yellow-200";
-            case 'visualizada':
-                return "bg-blue-100 text-blue-800 border-blue-200";
-            case 'aprovada':
-                return "bg-green-100 text-green-800 border-green-200";
-            case 'rejeitada':
-                return "bg-red-100 text-red-800 border-red-200";
-            default:
-                return "bg-gray-100 text-gray-800 border-gray-200";
-        }
-    };
-
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'pendente': return 'Pendente';
-            case 'visualizada': return 'Visualizada';
-            case 'aprovada': return 'Aprovada';
-            case 'rejeitada': return 'Rejeitada';
-            default: return status;
-        }
+        const styles: Record<string, string> = {
+            Enviada: 'bg-blue-100 text-blue-800 border-blue-200',
+            'Em Análise': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            Aprovada: 'bg-green-100 text-green-800 border-green-200',
+            Rejeitada: 'bg-red-100 text-red-800 border-red-200',
+          };
+        return styles[status] || "bg-gray-100 text-gray-800 border-gray-200";
     };
 
     if (loading) {
@@ -133,16 +133,16 @@ export default function MinhasCandidaturas() {
                 <button onClick={() => setFiltroStatus('todas')} className={`btn ${filtroStatus === 'todas' ? 'btn-primary' : 'btn-secondary'}`}>
                     Todas
                 </button>
-                <button onClick={() => setFiltroStatus('pendente')} className={`btn ${filtroStatus === 'pendente' ? 'btn-primary' : 'btn-secondary'}`}>
-                    Pendentes
+                <button onClick={() => setFiltroStatus('Enviada')} className={`btn ${filtroStatus === 'Enviada' ? 'btn-primary' : 'btn-secondary'}`}>
+                    Enviadas
                 </button>
-                <button onClick={() => setFiltroStatus('visualizada')} className={`btn ${filtroStatus === 'visualizada' ? 'btn-primary' : 'btn-secondary'}`}>
-                    Visualizadas
+                <button onClick={() => setFiltroStatus('Em Análise')} className={`btn ${filtroStatus === 'Em Análise' ? 'btn-primary' : 'btn-secondary'}`}>
+                    Em Análise
                 </button>
-                <button onClick={() => setFiltroStatus('aprovada')} className={`btn ${filtroStatus === 'aprovada' ? 'btn-primary' : 'btn-secondary'}`}>
+                <button onClick={() => setFiltroStatus('Aprovada')} className={`btn ${filtroStatus === 'Aprovada' ? 'btn-primary' : 'btn-secondary'}`}>
                     Aprovadas
                 </button>
-                <button onClick={() => setFiltroStatus('rejeitada')} className={`btn ${filtroStatus === 'rejeitada' ? 'btn-primary' : 'btn-secondary'}`}>
+                <button onClick={() => setFiltroStatus('Rejeitada')} className={`btn ${filtroStatus === 'Rejeitada' ? 'btn-primary' : 'btn-secondary'}`}>
                     Rejeitadas
                 </button>
             </div>
@@ -172,21 +172,21 @@ export default function MinhasCandidaturas() {
                         </div>
                         <div className="bg-white p-4 rounded-lg shadow text-center">
                             <div className="text-2xl font-bold text-yellow-600">
-                                {candidaturas.filter(c => c.status === 'pendente').length}
+                                {candidaturas.filter(c => c.status === 'Em Análise').length}
                             </div>
-                            <div className="text-sm text-gray-600">Pendentes</div>
+                            <div className="text-sm text-gray-600">Em Análise</div>
                         </div>
                         <div className="bg-white p-4 rounded-lg shadow text-center">
                             <div className="text-2xl font-bold text-green-600">
-                                {candidaturas.filter(c => c.status === 'aprovada').length}
+                                {candidaturas.filter(c => c.status === 'Aprovada').length}
                             </div>
                             <div className="text-sm text-gray-600">Aprovadas</div>
                         </div>
                         <div className="bg-white p-4 rounded-lg shadow text-center">
-                            <div className="text-2xl font-bold text-blue-600">
-                                {candidaturas.filter(c => c.status === 'visualizada').length}
+                            <div className="text-2xl font-bold text-red-600">
+                                {candidaturas.filter(c => c.status === 'Rejeitada').length}
                             </div>
-                            <div className="text-sm text-gray-600">Visualizadas</div>
+                            <div className="text-sm text-gray-600">Rejeitadas</div>
                         </div>
                     </div>
 
@@ -221,7 +221,7 @@ export default function MinhasCandidaturas() {
 
                                     <div className="md:text-right md:ml-4 mt-4 md:mt-0">
                                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(candidatura.status)}`}>
-                                            {getStatusText(candidatura.status)}
+                                            {candidatura.status}
                                         </span>
                                         
                                         <div className="mt-2 text-sm text-gray-600">
@@ -230,12 +230,18 @@ export default function MinhasCandidaturas() {
                                                 <div>Atualizada em: {formatarData(candidatura.updatedAt)}</div>
                                             )}
                                         </div>
+                                        <button onClick={() => handleOpenChat(candidatura)} className="btn-secondary mt-4">
+                                            Ver Mensagens
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </>
+            )}
+            {chatAberto && (
+                <ChatModal candidatura={chatAberto} onClose={() => setChatAberto(null)} />
             )}
         </section>
     );
