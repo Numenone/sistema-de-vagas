@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start": "tsx watch server.ts",
-    "build": "vite build",
-    "vercel-build": "prisma generate && prisma migrate deploy && vite build"
+    "dev:server": "tsx watch index.ts",
+    "start": "node dist/index.js",
+    "build:server": "tsc --project tsconfig.node.json",
+    "build": "prisma generate && prisma migrate deploy && npm run build:server && vite build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

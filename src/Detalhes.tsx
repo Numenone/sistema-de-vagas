@@ -24,7 +24,7 @@ export default function Detalhes() {
     async function buscaDados() {
       try {
         // Usa o novo endpoint para buscar uma vaga específica
-        const response = await fetch(`${apiUrl}/api/vagas/${params.vagaId}`)
+        const response = await fetch(`${apiUrl || ''}/api/vagas/${params.vagaId}`)
         if (!response.ok) {
           throw new Error('Vaga não encontrada');
         }

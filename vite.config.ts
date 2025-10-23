@@ -21,4 +21,19 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    proxy: {
+      // Redireciona requisições de API para o backend
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      // Redireciona rotas de autenticação que não estão sob /api
+      '/login': { target: 'http://localhost:3001', changeOrigin: true },
+      '/cadastro': { target: 'http://localhost:3001', changeOrigin: true },
+      '/forgot-password': { target: 'http://localhost:3001', changeOrigin: true },
+      '/reset-password': { target: 'http://localhost:3001', changeOrigin: true },
+      '/pusher/auth': { target: 'http://localhost:3001', changeOrigin: true },
+    },
+  },
 })

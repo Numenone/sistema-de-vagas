@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: linkedout
+    env: node
+    plan: free # ou 'starter' se precisar de mais recursos
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: linkedout-db # O nome que você dará ao seu banco de dados Neon na Render
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true # A Render irá gerar um segredo seguro para você
+      - key: PUSHER_APP_ID
+        sync: false
+      - key: PUSHER_KEY
+        sync: false
+      - key: PUSHER_SECRET
+        sync: false
+      - key: PUSHER_CLUSTER
+        sync: false
+      # Adicione aqui outras variáveis de ambiente (Cloudinary, Email, etc.)
