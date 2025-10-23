@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import type { UsuarioType } from '../utils/UsuarioType';
-import { useUsuarioStore } from '../context/UsuarioContext';
+import type { UsuarioType } from '../utils/UsuarioType.js';
+import { useUsuarioStore } from '../context/UsuarioContext.js';
 import { ShieldCheck, User, UserCog } from 'lucide-react';
 
 const apiUrl = import.meta.env.VITE_API_URL;

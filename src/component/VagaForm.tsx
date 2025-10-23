@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import type { EmpresaType } from '../utils/EmpresaType';
+import type { EmpresaType } from '../utils/EmpresaType.js';
 
 type Inputs = {
   titulo: string;

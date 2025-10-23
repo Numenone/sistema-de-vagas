@@ -1,7 +1,7 @@
 // AuthInitializer.tsx
 import { useEffect } from 'react'
-import { useUsuarioStore } from '../context/UsuarioContext'
-import { subscribeToPush } from '../utils/push'; // This path is now correct
+import { useUsuarioStore } from '../context/UsuarioContext.js'
+import { subscribeToPush } from '../utils/push.js'; // This path is now correct
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
 export default function AuthInitializer() {

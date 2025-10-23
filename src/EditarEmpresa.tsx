@@ -2,8 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useUsuarioStore } from './context/UsuarioContext';
-import type { EmpresaType } from './utils/EmpresaType';
+import { useUsuarioStore } from './context/UsuarioContext.js';
+import type { EmpresaType } from './utils/EmpresaType.js';
 
 type Inputs = {
   nome: string;

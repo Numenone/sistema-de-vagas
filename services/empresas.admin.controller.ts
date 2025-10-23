@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as adminEmpresasService from '../services/empresas.admin.service';
+import * as adminEmpresasService from '../services/empresas.admin.service.js';
 
 export const getEmpresas = async (req: Request, res: Response, next: NextFunction) => {
   try {

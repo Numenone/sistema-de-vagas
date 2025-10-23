@@ -23,8 +23,8 @@ import {
   processTimeline,
   processVagasPorModalidade, // Adicionando a função que faltava
   formatTimelineDate,
-} from '../utils/dashboard.utils';
-import { useUsuarioStore } from '../context/UsuarioContext';
+} from '../utils/dashboard.utils.js';
+import { useUsuarioStore } from '../context/UsuarioContext.js';
 
 type ChartType = 'empresa' | 'status' | 'salario' | 'topVagas' | 'modalidade';
 

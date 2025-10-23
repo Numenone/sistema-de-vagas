@@ -1,5 +1,5 @@
-import type { EmpresaType } from "./EmpresaType"
-import type { HabilidadeType } from "./HabilidadeType"
+import type { EmpresaType } from "./EmpresaType.js"
+import type { HabilidadeType } from "./HabilidadeType.js"
 
 export type VagaType = {
     id: number

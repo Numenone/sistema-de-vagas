@@ -1,8 +1,8 @@
-import type { VagaType } from "./utils/VagaType"
+import type { VagaType } from "./utils/VagaType.js"
 import { useParams, Link } from "react-router-dom"
-import { CardVaga } from "./component/CardVaga"
+import { CardVaga } from "./component/CardVaga.js"
 import { useEffect, useState } from "react"
-import { useUsuarioStore } from "./context/UsuarioContext"
+import { useUsuarioStore } from "./context/UsuarioContext.js"
 import { useForm } from "react-hook-form"
 import { toast } from 'sonner'
 import React from 'react'

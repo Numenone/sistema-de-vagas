@@ -2,10 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useForm, useForm as useFormAssociar } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useUsuarioStore } from './context/UsuarioContext';
-import type { EmpresaType } from './utils/EmpresaType';
+import { useUsuarioStore } from './context/UsuarioContext.js';
+import type { EmpresaType } from './utils/EmpresaType.js';
 
-import type { UsuarioType } from './utils/UsuarioType';
+import type { UsuarioType } from './utils/UsuarioType.js';
 // Tipos para o formulário principal de edição da empresa
 type Inputs = {
   nome: string;

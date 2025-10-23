@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { toast } from 'sonner';
-import type { VagaType } from './utils/VagaType';
-import { useUsuarioStore } from './context/UsuarioContext';
+import type { VagaType } from './utils/VagaType.js';
+import { useUsuarioStore } from './context/UsuarioContext.js';
 import { Link, useNavigate } from 'react-router-dom';
-import { VagaForm } from './component/VagaForm';
+import { VagaForm } from './component/VagaForm.js';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 

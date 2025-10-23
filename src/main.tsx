@@ -3,34 +3,34 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import React from 'react'
 
-import App from './App'
-import Login from './Login'
-import Detalhes from './Detalhes'
-import MinhasCandidaturas from './MinhasCandidaturas'
-import CandidaturasEmpresa from './CandidaturasEmpresa' // Importar a nova página
-import PerfilCandidato from './PerfilCandidato'; // Importar a nova página de perfil
-import PerfilLider from './PerfilLider'; // Importa a nova página
-import Cadastro from './Cadastro'
-import EditarPerfil from './EditarPerfil' // This line already exists and is correct.
-import MinhasVagas from './MinhasVagas'
-import EsqueciSenha from './EsqueciSenha'
-import EditarEmpresa from './EditarEmpresa'; // Importa a nova página
-import EmpresaPerfil from './EmpresaPerfil'
-import EditarVagaAdmin from './EditarVagaAdmin'; // Importar a nova página
-import EditarEmpresaAdmin from './EditarEmpresaAdmin' // Importar a nova página
-import MinhasVagasFavoritas from './MinhasVagasFavoritas'
-import CriarEmpresaAdmin from './CriarEmpresaAdmin'; // Adicionar a nova rota de criação
-import RedefinirSenha from './RedefinirSenha'
+import App from './App.js'
+import Login from './Login.js'
+import Detalhes from './Detalhes.js'
+import MinhasCandidaturas from './MinhasCandidaturas.js'
+import CandidaturasEmpresa from './CandidaturasEmpresa.js' // Importar a nova página
+import PerfilCandidato from './PerfilCandidato.js'; // Importar a nova página de perfil
+import PerfilLider from './PerfilLider.js'; // Importa a nova página
+import Cadastro from './Cadastro.js'
+import EditarPerfil from './EditarPerfil.js' // This line already exists and is correct.
+import MinhasVagas from './MinhasVagas.js'
+import EsqueciSenha from './EsqueciSenha.js'
+import EditarEmpresa from './EditarEmpresa.js'; // Importa a nova página
+import EmpresaPerfil from './EmpresaPerfil.js'
+import EditarVagaAdmin from './EditarVagaAdmin.js'; // Importar a nova página
+import EditarEmpresaAdmin from './EditarEmpresaAdmin.js' // Importar a nova página
+import MinhasVagasFavoritas from './MinhasVagasFavoritas.js'
+import CriarEmpresaAdmin from './CriarEmpresaAdmin.js'; // Adicionar a nova rota de criação
+import RedefinirSenha from './RedefinirSenha.js'
 
-import Layout from './Layout'
+import Layout from './Layout.js'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Dashboard from './component/Dashboard';
-import GerenciarVagas from './component/GerenciarVagas';
-import GerenciarCandidaturas from './component/GerenciarCandidaturas';
-import GerenciarEmpresas from './component/GerenciarEmpresas'; // Importar a nova página
-import GerenciarUsuarios from './component/GerenciarUsuarios';
-import AuthInitializer from './component/AuthInitializer';
-import AdminProtectedRoute from './component/AdminProtectedRoute';
+import Dashboard from './component/Dashboard.js';
+import GerenciarVagas from './component/GerenciarVagas.js';
+import GerenciarCandidaturas from './component/GerenciarCandidaturas.js';
+import GerenciarEmpresas from './component/GerenciarEmpresas.js'; // Importar a nova página
+import GerenciarUsuarios from './component/GerenciarUsuarios.js';
+import AuthInitializer from './component/AuthInitializer.js';
+import AdminProtectedRoute from './component/AdminProtectedRoute.js';
 
 const rotas = createBrowserRouter([
   {

@@ -3,12 +3,13 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import 'express-async-errors';
-import routes from './routes/index';
-import { errorHandler } from './middlewares/errorHandler';
+import routes from './routes/index.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 const __dirname = path.resolve();
 const app = express();
 
+app.options('*', cors()) // enable pre-flight request for all routes
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

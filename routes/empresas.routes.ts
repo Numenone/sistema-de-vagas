@@ -2,9 +2,9 @@ import { Router } from 'express';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
-import * as empresasController from '../controllers/empresas.controller';
-import { validate } from '../middlewares/validate';
-import { updateEmpresaSchema } from '../schemas/empresa.schema';
+import * as empresasController from '../controllers/empresas.controller.js';
+import { validate } from '../middlewares/validate.js';
+import { updateEmpresaSchema } from '../schemas/empresa.schema.js';
 
 const router = Router();
 

@@ -1,4 +1,4 @@
-import { UsuarioType } from "./UsuarioType";
+import { UsuarioType } from "./UsuarioType.js";
 
 export type EmpresaType = {
     id: number;

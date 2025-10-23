@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 import { Vaga, Prisma } from '@prisma/client';
 
 export const getAll = async (query: any): Promise<{ vagas: Vaga[], totalPages: number, currentPage: number }> => {

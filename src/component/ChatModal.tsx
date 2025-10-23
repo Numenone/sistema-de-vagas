@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import Pusher from 'pusher-js';
 import type { Members, PresenceChannel } from 'pusher-js';
-import { useUsuarioStore } from '../context/UsuarioContext';
-import type { CandidaturaType } from '../utils/CandidaturaType';
+import { useUsuarioStore } from '../context/UsuarioContext.js';
+import type { CandidaturaType } from '../utils/CandidaturaType.js';
 import { Send } from 'lucide-react';
 
 const pusherKey = import.meta.env.VITE_PUSHER_KEY;

@@ -1,20 +1,20 @@
 import express from 'express';
-import authRouter from './auth.routes';
-import vagasRouter from './vagas.routes';
-import empresasRouter from './empresas.routes';
-import candidaturasRouter from './candidaturas.routes';
-import dashboardRouter from './dashboard.routes';
-import habilidadesRouter from './habilidades.routes';
-import favoritosRouter from './favoritos.routes';
-import atividadesRouter from './atividades.routes';
-import adminRouter from './admin.routes';
-import adminEmpresasRouter from './empresas.admin.routes';
-import mensagensRouter from './mensagens.routes';
-import pushRouter from './push.routes';
-import empresaManagementRouter from './empresa.management.routes';
-import usuariosRouter from './usuarios.routes'; // Importa o novo router
-import { pusherAuth } from './websocket';
-import { authenticateToken } from '../middlewares/auth.middleware';
+import authRouter from './auth.routes.js';
+import vagasRouter from './vagas.routes.js';
+import empresasRouter from './empresas.routes.js';
+import candidaturasRouter from './candidaturas.routes.js';
+import dashboardRouter from './dashboard.routes.js';
+import habilidadesRouter from './habilidades.routes.js';
+import favoritosRouter from './favoritos.routes.js';
+import atividadesRouter from './atividades.routes.js';
+import adminRouter from './admin.routes.js';
+import adminEmpresasRouter from './empresas.admin.routes.js';
+import mensagensRouter from './mensagens.routes.js';
+import pushRouter from './push.routes.js';
+import empresaManagementRouter from './empresa.management.routes.js';
+import usuariosRouter from './usuarios.routes.js'; // Importa o novo router
+import { pusherAuth } from './websocket.js';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
 
 const routes = express.Router();
 

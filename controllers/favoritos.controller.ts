@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as favoritosService from '../services/favoritos.service';
+import * as favoritosService from '../services/favoritos.service.js';
 
 export async function getFavoritos(req: Request, res: Response) {
   const favoritos = await favoritosService.getFavoritosByUsuario(req.usuario!.id);

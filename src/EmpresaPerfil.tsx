@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { CardVaga } from './component/CardVaga';
-import type { EmpresaType } from './utils/EmpresaType';
-import type { VagaType } from './utils/VagaType';
-import { useUsuarioStore } from './context/UsuarioContext';
-import { PaginationControls } from './component/PaginationControls';
+import { CardVaga } from './component/CardVaga.js';
+import type { EmpresaType } from './utils/EmpresaType.js';
+import type { VagaType } from './utils/VagaType.js';
+import { useUsuarioStore } from './context/UsuarioContext.js';
+import { PaginationControls } from './component/PaginationControls.js';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 

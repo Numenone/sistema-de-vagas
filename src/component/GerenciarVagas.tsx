@@ -1,11 +1,11 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { toast } from 'sonner';
-import type { VagaType } from '../utils/VagaType';
-import type { EmpresaType } from '../utils/EmpresaType';
-import { useUsuarioStore } from '../context/UsuarioContext';
+import type { VagaType } from '../utils/VagaType.js';
+import type { EmpresaType } from '../utils/EmpresaType.js';
+import { useUsuarioStore } from '../context/UsuarioContext.js';
 import { Link } from 'react-router-dom';
-import { VagaForm } from './VagaForm';
+import { VagaForm } from './VagaForm.js';
 
 // Função de debounce para evitar múltiplas requisições à API
 function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {

@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { authenticateToken } from '../middlewares/auth.middleware';
-import * as vagasController from '../controllers/vagas.controller';
-import { validate } from '../middlewares/validate';
-import { createVagaSchema, updateVagaSchema } from '../schemas/vaga.schema';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
+import * as vagasController from '../controllers/vagas.controller.js';
+import { validate } from '../middlewares/validate.js';
+import { createVagaSchema, updateVagaSchema } from '../schemas/vaga.schema.js';
 
 const router = Router();
 

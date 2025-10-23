@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { CardVaga } from "./component/CardVaga";
-import { InputPesquisa } from "./component/InputPesquisa";
-import type { VagaType } from "./utils/VagaType";
-import { FeedAtividades } from "./component/FeedAtividades"; 
-import type { HabilidadeType } from "./utils/HabilidadeType";
-import { CardVagaSkeleton } from "./component/CardVagaSkeleton"; // Importa o novo componente
+import { CardVaga } from "./component/CardVaga.js";
+import { InputPesquisa } from "./component/InputPesquisa.js";
+import type { VagaType } from "./utils/VagaType.js";
+import { FeedAtividades } from "./component/FeedAtividades.js"; 
+import type { HabilidadeType } from "./utils/HabilidadeType.js";
+import { CardVagaSkeleton } from "./component/CardVagaSkeleton.js"; // Importa o novo componente
 import React from 'react'
-import { PaginationControls } from "./component/PaginationControls";
+import { PaginationControls } from "./component/PaginationControls.js";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 

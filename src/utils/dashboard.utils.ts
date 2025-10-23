@@ -1,5 +1,5 @@
-import type { VagaType } from './VagaType';
-import type { CandidaturaType } from './CandidaturaType';
+import type { VagaType } from './VagaType.js';
+import type { CandidaturaType } from './CandidaturaType.js';
 import { Briefcase, FileText } from 'lucide-react';
 
 // --- Tipos de Dados ---

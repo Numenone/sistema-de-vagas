@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useUsuarioStore } from "./context/UsuarioContext";
-import type { CandidaturaType } from "./utils/CandidaturaType";
+import { useUsuarioStore } from "./context/UsuarioContext.js";
+import type { CandidaturaType } from "./utils/CandidaturaType.js";
 import React from 'react';
-import ChatModal from "./component/ChatModal"; // Importar o modal
+import ChatModal from "./component/ChatModal.js"; // Importar o modal
 import { toast } from "sonner";
 
 const apiUrl = import.meta.env.VITE_API_URL;

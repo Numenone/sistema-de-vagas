@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import * as UsuarioService from '../services/usuario.service';
-import * as authService from '../services/auth.service';
+import * as UsuarioService from '../services/usuario.service.js';
+import * as authService from '../services/auth.service.js';
 
 export const getAllUsuarios = async (req: Request, res: Response, next: NextFunction) => {
   try {

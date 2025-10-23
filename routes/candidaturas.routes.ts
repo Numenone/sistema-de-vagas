@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { authenticateToken } from '../middlewares/auth.middleware';
-import * as candidaturasController from '../controllers/candidaturas.controller';
-import { validate } from '../middlewares/validate';
-import { createCandidaturaSchema, updateCandidaturaSchema } from '../schemas/candidatura.schema';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
+import * as candidaturasController from '../controllers/candidaturas.controller.js';
+import { validate } from '../middlewares/validate.js';
+import { createCandidaturaSchema, updateCandidaturaSchema } from '../schemas/candidatura.schema.js';
 
 const router = Router();
 

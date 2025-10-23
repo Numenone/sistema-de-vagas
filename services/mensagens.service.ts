@@ -1,6 +1,6 @@
 import { Usuario, Prisma } from '@prisma/client';
-import { sendPushNotification } from './push.service';
-import { prisma } from '../lib/prisma';
+import { sendPushNotification } from './push.service.js';
+import { prisma } from '../lib/prisma.js';
 import Pusher from 'pusher';
 
 const pusher = new Pusher({

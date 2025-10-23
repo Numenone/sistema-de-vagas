@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useUsuarioStore } from './context/UsuarioContext';
-import type { UsuarioType } from './utils/UsuarioType';
+import { useUsuarioStore } from './context/UsuarioContext.js';
+import type { UsuarioType } from './utils/UsuarioType.js';
 import { Mail, Calendar } from 'lucide-react';
 
 const apiUrl = import.meta.env.VITE_API_URL;

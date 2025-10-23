@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useUsuarioStore } from './context/UsuarioContext';
-import { passwordValidation } from '../schemas/usuario.schema';
+import { useUsuarioStore } from './context/UsuarioContext.js';
+import { passwordValidation } from '../schemas/usuario.schema.js';
 
 // Schema de validação com Zod
 const schema = z.object({

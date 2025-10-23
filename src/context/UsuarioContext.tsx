@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { UsuarioType } from '../utils/UsuarioType';
-import type { VagaType } from '../utils/VagaType';
+import type { UsuarioType } from '../utils/UsuarioType.js';
+import type { VagaType } from '../utils/VagaType.js';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 

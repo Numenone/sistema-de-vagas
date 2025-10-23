@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
-import { useUsuarioStore } from "./context/UsuarioContext"
+import { useUsuarioStore } from "./context/UsuarioContext.js"
 
 type Inputs = {
     email: string

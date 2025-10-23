@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useUsuarioStore } from '../context/UsuarioContext';
-import type { EmpresaType } from '../utils/EmpresaType';
+import { useUsuarioStore } from '../context/UsuarioContext.js';
+import type { EmpresaType } from '../utils/EmpresaType.js';
 import { Building2, Edit, UserCog, Briefcase } from 'lucide-react';
 
 const apiUrl = import.meta.env.VITE_API_URL;

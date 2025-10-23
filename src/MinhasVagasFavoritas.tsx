@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useUsuarioStore } from './context/UsuarioContext';
-import type { VagaType } from './utils/VagaType';
-import { CardVaga } from './component/CardVaga';
+import { useUsuarioStore } from './context/UsuarioContext.js';
+import type { VagaType } from './utils/VagaType.js';
+import { CardVaga } from './component/CardVaga.js';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 

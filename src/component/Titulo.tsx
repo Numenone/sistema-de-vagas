@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { useUsuarioStore } from "../context/UsuarioContext";
+import { useUsuarioStore } from "../context/UsuarioContext.js";
 import React from 'react';
-import UserMenu from "./UserMenu"; // Importa o novo componente
+import UserMenu from "./UserMenu.js"; // Importa o novo componente
 
 export default function Titulo() {
     const { usuario } = useUsuarioStore();

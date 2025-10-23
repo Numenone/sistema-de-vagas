@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useUsuarioStore } from './context/UsuarioContext';
+import { useUsuarioStore } from './context/UsuarioContext.js';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 

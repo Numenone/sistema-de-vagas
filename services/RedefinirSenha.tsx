@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
-import { passwordValidation } from '../schemas/usuario.schema'; // Importa a validação
+import { passwordValidation } from '../schemas/usuario.schema.js'; // Importa a validação
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const apiUrl = import.meta.env.VITE_API_URL;

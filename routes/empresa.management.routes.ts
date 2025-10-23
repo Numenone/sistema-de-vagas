@@ -2,11 +2,10 @@ import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
-import { authenticateToken } from '../middlewares/auth.middleware';
-import * as empresaManagementController from '../controllers/empresa.management.controller';
-import { validate } from '../middlewares/validate';
-import { associarLiderSchema } from '../schemas/empresa.management.schema';
-import { createEmpresaSchema, updateEmpresaSchema } from '../schemas/empresa.schema';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
+import * as empresaManagementController from '../controllers/empresa.management.controller.js';
+import { validate } from '../middlewares/validate.js';
+import { createEmpresaSchema, updateEmpresaSchema } from '../schemas/empresa.schema.js';
 
 const router = Router();
 

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import type { VagaType } from "../utils/VagaType";
+import type { VagaType } from "../utils/VagaType.js";
 import { useState, useEffect } from 'react';
-import { useUsuarioStore } from "../context/UsuarioContext";
+import { useUsuarioStore } from "../context/UsuarioContext.js";
 import { Heart } from 'lucide-react';
 import { toast } from "sonner";
 

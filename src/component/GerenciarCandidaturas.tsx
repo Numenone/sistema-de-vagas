@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { useUsuarioStore } from '../context/UsuarioContext';
-import { type CandidaturaType, STATUS_CANDIDATURA, type StatusCandidatura, statusStyles } from '../utils/CandidaturaType';
+import { useUsuarioStore } from '../context/UsuarioContext.js';
+import { type CandidaturaType, STATUS_CANDIDATURA, type StatusCandidatura, statusStyles } from '../utils/CandidaturaType.js';
 import { Search, Filter } from 'lucide-react';
 
 const apiUrl = import.meta.env.VITE_API_URL;

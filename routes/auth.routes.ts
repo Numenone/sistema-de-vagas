@@ -2,10 +2,10 @@ import { Router } from 'express';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
-import { authenticateToken } from '../middlewares/auth.middleware';
-import * as authController from '../controllers/auth.controller';
-import { validate } from '../middlewares/validate';
-import { updateUsuarioSchema } from '../schemas/usuario.schema';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
+import * as authController from '../controllers/auth.controller.js';
+import { validate } from '../middlewares/validate.js';
+import { updateUsuarioSchema } from '../schemas/usuario.schema.js';
 
 const router = Router();
 

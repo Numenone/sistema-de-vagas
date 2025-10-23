@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as mensagensService from '../services/mensagens.service';
+import * as mensagensService from '../services/mensagens.service.js';
 
 export async function getMensagensByCandidatura(req: Request, res: Response) {
   const { candidaturaId } = req.params;

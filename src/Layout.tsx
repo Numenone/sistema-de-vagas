@@ -1,4 +1,4 @@
-import Titulo from './component/Titulo'
+import Titulo from './component/Titulo.js'
 import { Outlet } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import React from 'react'

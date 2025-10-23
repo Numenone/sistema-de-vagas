@@ -1,10 +1,10 @@
 import { Prisma, Usuario } from '@prisma/client';
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { sendPasswordResetEmail } from './email.service';
-import * as usuarioService from './usuario.service';
+import { sendPasswordResetEmail } from './email.service.js';
+import * as usuarioService from './usuario.service.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'SEU_SEGREDO_SUPER_SECRETO';
 

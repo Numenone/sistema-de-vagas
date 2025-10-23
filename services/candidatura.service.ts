@@ -1,5 +1,5 @@
 import { Candidatura, Prisma } from '@prisma/client';
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 
 export const getAll = async (query: any): Promise<Candidatura[]> => {
   const { usuarioId, vagaId, status, search, empresaId } = query;

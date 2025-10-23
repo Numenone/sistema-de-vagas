@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { authenticateToken } from '../middlewares/auth.middleware';
-import { isAdmin } from '../middlewares/admin.middleware';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
+import { isAdmin } from '../middlewares/admin.middleware.js';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
-import * as adminEmpresasController from '../controllers/empresas.admin.controller';
+import * as adminEmpresasController from '../controllers/empresas.admin.controller.js';
 
 const router = Router();
 

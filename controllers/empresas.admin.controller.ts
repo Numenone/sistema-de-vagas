@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as adminEmpresasService from '../services/empresas.admin.service';
+import * as adminEmpresasService from '../services/empresas.admin.service.js';
 
 export async function getEmpresas(req: Request, res: Response) {
   const { search } = req.query;

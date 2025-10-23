@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useUsuarioStore } from '../context/UsuarioContext';
+import { useUsuarioStore } from '../context/UsuarioContext.js';
 
 export default function AdminProtectedRoute() {
   const { usuario } = useUsuarioStore();

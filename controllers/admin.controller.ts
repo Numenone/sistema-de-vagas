@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as adminService from '../services/admin.service';
+import * as adminService from '../services/admin.service.js';
 
 export const getUsuarios = async (req: Request, res: Response, next: NextFunction) => {
   try {

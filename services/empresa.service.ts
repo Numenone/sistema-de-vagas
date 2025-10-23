@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 import { Empresa, Prisma } from '@prisma/client';
 
 export const getAll = async (): Promise<Empresa[]> => {

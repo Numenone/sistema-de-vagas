@@ -1,5 +1,5 @@
-import type { VagaType } from "./VagaType"
-import type { UsuarioType } from "./UsuarioType"
+import type { VagaType } from "./VagaType.js"
+import type { UsuarioType } from "./UsuarioType.js"
 
 export const STATUS_CANDIDATURA = ['Enviada', 'Em Análise', 'Aprovada', 'Rejeitada'] as const;
 export type StatusCandidatura = typeof STATUS_CANDIDATURA[number];

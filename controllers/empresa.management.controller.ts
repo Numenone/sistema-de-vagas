@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as empresaManagementService from '../services/empresa.management.service';
+import * as empresaManagementService from '../services/empresa.management.service.js';
 
 export const getMinhaEmpresaStats = async (req: Request, res: Response, next: NextFunction) => {
   try {

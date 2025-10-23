@@ -1,5 +1,5 @@
 import { Request, Response} from 'express';
-import * as CandidaturaService from '../services/candidatura.service';
+import * as CandidaturaService from '../services/candidatura.service.js';
 
 export const getAllCandidaturasByEmpresa = async (req: Request, res: Response) => {
   if (req.usuario?.tipo !== 'lider' || !req.usuario.empresaId) {

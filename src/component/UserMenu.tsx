@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useUsuarioStore } from '../context/UsuarioContext';
+import { useUsuarioStore } from '../context/UsuarioContext.js';
 import { Bell, BellOff } from 'lucide-react';
-import { subscribeToPush } from '../utils/push';
+import { subscribeToPush } from '../utils/push.js';
 
 type NavLink = {
   to: string;

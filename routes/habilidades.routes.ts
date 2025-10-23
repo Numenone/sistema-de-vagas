@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as habilidadesController from '../controllers/habilidades.controller';
+import * as habilidadesController from '../controllers/habilidades.controller.js';
 
 const router = Router();
 

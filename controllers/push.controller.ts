@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { saveSubscription, isPushAvailable } from '../services/push.service';
+import { saveSubscription, isPushAvailable } from '../services/push.service.js';
 
 export function getVapidKey(req: Request, res: Response) {
   if (!isPushAvailable()) {

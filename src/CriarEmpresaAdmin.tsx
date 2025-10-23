@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useUsuarioStore } from './context/UsuarioContext';
+import { useUsuarioStore } from './context/UsuarioContext.js';
 
 
 type Inputs = {

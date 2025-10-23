@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useUsuarioStore } from './context/UsuarioContext';
-import type { VagaType } from './utils/VagaType';
-import { VagaForm } from './component/VagaForm';
+import { useUsuarioStore } from './context/UsuarioContext.js';
+import type { VagaType } from './utils/VagaType.js';
+import { VagaForm } from './component/VagaForm.js';
 
 type Inputs = {
   titulo: string;
