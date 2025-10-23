@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start": "ts-node-dev --respawn --transpile-only server.ts",
-    "build": "tsc && vite build",
+    "start": "tsx watch server.ts",
+    "build": "tsc --project tsconfig.build.json && vite build",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma migrate deploy && npm run build"
   },
