@@ -1,7 +1,6 @@
 import Pusher from 'pusher';
 import { Server } from 'http';
 import { Request, Response } from 'express';
-import { authenticateToken } from '../middlewares/auth.middleware';
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,

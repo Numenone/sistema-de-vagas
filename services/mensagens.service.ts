@@ -1,5 +1,5 @@
 import { Usuario } from '@prisma/client';
-import { sendPushNotification } from '../push';
+import { sendPushNotification } from '../utils/push';
 import { prisma } from '../lib/prisma';
 import Pusher from 'pusher';
 

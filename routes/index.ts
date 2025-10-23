@@ -12,7 +12,7 @@ import adminEmpresasRouter from './empresas.admin.routes';
 import mensagensRouter from './mensagens.routes';
 import pushRouter from './push.routes';
 import empresaManagementRouter from './empresa.management.routes';
-import { pusherAuth } from '../websocket';
+import { pusherAuth } from './websocket';
 
 const routes = express.Router();
 
