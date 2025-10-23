@@ -49,7 +49,7 @@ export default function EditarPerfil() {
     }
 
     try {
-      const response = await fetchAutenticado(`${apiUrl}/api/usuarios/${usuario.id}`, {
+      const response = await fetchAutenticado(`${apiUrl}/api/auth/usuarios/${usuario.id}`, {
         method: 'PATCH',
         body: formData,
       });

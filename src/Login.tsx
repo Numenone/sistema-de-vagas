@@ -18,7 +18,7 @@ export default function Login() {
     async function verificaLogin(data: Inputs) {
         try {
             // 1. Alterado para uma requisição POST com os dados no corpo (body)
-            const response = await fetch(`${apiUrl || ''}/login`, {
+            const response = await fetch(`${apiUrl || ''}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

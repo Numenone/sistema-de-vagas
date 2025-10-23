@@ -11,19 +11,25 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Todas as rotas da API serão prefixadas com /api
 app.use('/api', routes);
 
-// --- Servir Arquivos Estáticos do Frontend em Produção ---
-app.use(express.static(path.join(__dirname, 'dist')));
+// --- Servir Arquivos Estáticos e Rota Catch-all para a SPA ---
+// Apenas em ambiente de produção (ex: quando não estiver em desenvolvimento com o Vite)
+if (process.env.NODE_ENV === 'production') {
+  // Servir arquivos estáticos do build do frontend
+  app.use(express.static(path.join(__dirname, 'dist')));
 
-// --- Rota Catch-all para a SPA (Single Page Application) ---
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+  // Rota Catch-all para a SPA (Single Page Application)
+  // Deve vir DEPOIS das rotas da API
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+}
 
 // Middleware de tratamento de erros global (deve ser o último)
 app.use(errorHandler);
 
-export default app; // Exporta o app para a Vercel
+export default app;

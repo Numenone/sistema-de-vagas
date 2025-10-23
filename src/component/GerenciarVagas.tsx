@@ -1,10 +1,24 @@
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useForm, FormProvider } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { VagaType } from '../utils/VagaType';
 import type { EmpresaType } from '../utils/EmpresaType';
 import { useUsuarioStore } from '../context/UsuarioContext';
 import { Link } from 'react-router-dom';
+import { VagaForm } from './VagaForm';
+
+// Função de debounce para evitar múltiplas requisições à API
+function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return (...args: Parameters<F>): void => {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
+}
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -21,36 +35,41 @@ type Inputs = {
 export default function GerenciarVagas() {
   const [vagas, setVagas] = useState<VagaType[]>([]);
   const [empresas, setEmpresas] = useState<EmpresaType[]>([]);
+  const [vagaParaConfirmar, setVagaParaConfirmar] = useState<VagaType | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const { register, handleSubmit, reset } = useForm<Inputs>(); // Removed fetchAutenticado from here
+  const methods = useForm<Inputs>();
   const { fetchAutenticado } = useUsuarioStore(); // Correctly get fetchAutenticado from useUsuarioStore
 
-  useEffect(() => {
-    fetchVagas();
-    fetchEmpresas();
-  }, [searchTerm]); // Re-executa quando o termo de busca muda
-
-  const fetchVagas = async () => {
+  // A função de busca de vagas agora é envolvida por useCallback.
+  const fetchVagas = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       // Pede todas as vagas (ativas e inativas) para o painel de admin
       params.append('status', 'all');
-      // Adiciona o termo de busca se ele existir
-      if (searchTerm) {
-        params.append('adminSearch', searchTerm);
-      }
+      // Adiciona o termo de busca se ele existir, ou 'true' para indicar uma busca de admin
+      params.append('adminSearch', searchTerm || 'true');
+      params.append('_expand', 'empresa');
+
 
       const response = await fetchAutenticado(`${apiUrl}/api/vagas?${params.toString()}`);
       if (!response.ok) throw new Error('Falha ao buscar vagas.');
       const dados = await response.json();
-      if (Array.isArray(dados.vagas)) {
+      if (dados.vagas) {
         setVagas(dados.vagas);
       }
     } catch (error) {
       console.error('Erro ao buscar vagas:', error);
       toast.error('Erro ao carregar vagas.');
     }
-  };
+  }, [searchTerm, fetchAutenticado]);
+
+  // O debounce é criado a partir da função `fetchVagas` já declarada.
+  const debouncedFetch = useMemo(() => debounce(fetchVagas, 500), [fetchVagas]);
+
+  useEffect(() => {
+    debouncedFetch();
+    fetchEmpresas();
+  }, [debouncedFetch]); // A dependência agora é apenas o debouncedFetch
 
   const fetchEmpresas = async () => {
     try {
@@ -76,7 +95,7 @@ export default function GerenciarVagas() {
 
       if (response.ok) {
         toast.success('Vaga criada com sucesso!');
-        reset();
+        methods.reset();
         fetchVagas();
       } else {
         const errorData = await response.json();
@@ -87,21 +106,25 @@ export default function GerenciarVagas() {
     }
   };
 
-  const toggleVagaStatus = async (vaga: VagaType) => {
+  const handleToggleVagaStatus = async () => {
+    if (!vagaParaConfirmar) return;
+
     try {
       // Usa o novo endpoint para atualizar vagas
-      const response = await fetchAutenticado(`${apiUrl}/api/vagas/${vaga.id}`, {
+      const response = await fetchAutenticado(`${apiUrl}/api/vagas/${vagaParaConfirmar.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ ativa: !vaga.ativa })
+        body: JSON.stringify({ ativa: !vagaParaConfirmar.ativa })
       });
       if (response.ok) {
         fetchVagas();
-        toast.success(`Vaga ${!vaga.ativa ? 'ativada' : 'desativada'} com sucesso!`);
+        toast.success(`Vaga ${!vagaParaConfirmar.ativa ? 'ativada' : 'desativada'} com sucesso!`);
       } else {
         throw new Error('Falha ao alterar status.');
       }
     } catch (error) {
       console.error('Erro ao alterar status da vaga:', error);
+    } finally {
+      setVagaParaConfirmar(null); // Fecha o modal
     }
   };
 
@@ -109,35 +132,19 @@ export default function GerenciarVagas() {
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">Gerenciar Vagas</h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="card mb-8">
-        <h2 className="text-xl font-bold mb-4">Nova Vaga</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <input {...register('titulo')} placeholder="Título" className="form-input" required />
-          <input {...register('salario')} type="number" placeholder="Salário" className="form-input" required />
-        </div>
-        <textarea {...register('descricao')} placeholder="Descrição" className="form-input mb-4" rows={3} required />
-        <textarea {...register('requisitos')} placeholder="Requisitos" className="form-input mb-4" rows={2} required />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <select {...register('modalidade')} className="form-input" required>
-            <option value="">Selecione a modalidade</option>
-            <option value="Remoto">Remoto</option>
-            <option value="Híbrido">Híbrido</option>
-            <option value="Presencial">Presencial</option>
-          </select>
-          <select {...register('tipoContrato')} className="form-input" required>
-            <option value="">Selecione o tipo de contrato</option>
-            <option value="CLT">CLT</option>
-            <option value="PJ">PJ</option>
-          </select>
-        </div>
-        <select {...register('empresaId')} className="form-input mb-4" required>
-          <option value="">Selecione a empresa</option>
-          {empresas.map(empresa => (
-            <option key={empresa.id} value={empresa.id}>{empresa.nome}</option>
-          ))}
-        </select>
-        <button type="submit" className="btn-primary">Criar Vaga</button>
-      </form>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="card mb-8">
+          <h2 className="text-xl font-bold mb-4">Nova Vaga</h2>
+          <VagaForm
+            isSubmitting={methods.formState.isSubmitting}
+            empresas={empresas}
+            isAdminForm={true}
+          />
+          <button type="submit" className="btn-primary mt-6" disabled={methods.formState.isSubmitting}>
+            {methods.formState.isSubmitting ? 'Criando...' : 'Criar Vaga'}
+          </button>
+        </form>
+      </FormProvider>
 
       <div className="mb-6">
         <h2 className="text-xl font-bold mb-4">Buscar Vagas</h2>
@@ -176,7 +183,7 @@ export default function GerenciarVagas() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex gap-2">
-                      <button onClick={() => toggleVagaStatus(vaga)} className="btn-secondary">
+                      <button onClick={() => setVagaParaConfirmar(vaga)} className="btn-secondary">
                         {vaga.ativa ? 'Desativar' : 'Ativar'}
                       </button>
                       <Link to={`/admin/vagas/${vaga.id}/editar`} className="btn-primary">Editar</Link>
@@ -188,6 +195,28 @@ export default function GerenciarVagas() {
           </table>
         </div>
       </div>
+
+      {/* Modal de Confirmação */}
+      {vagaParaConfirmar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">Confirmar Ação</h3>
+            <p>
+              Você tem certeza que deseja{' '}
+              <span className="font-bold">{vagaParaConfirmar.ativa ? 'desativar' : 'ativar'}</span> a vaga &quot;
+              <span className="font-bold">{vagaParaConfirmar.titulo}</span>&quot;?
+            </p>
+            <div className="mt-6 flex justify-end gap-4">
+              <button onClick={() => setVagaParaConfirmar(null)} className="btn-secondary">
+                Cancelar
+              </button>
+              <button onClick={handleToggleVagaStatus} className="btn-danger">
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

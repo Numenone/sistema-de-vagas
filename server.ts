@@ -2,7 +2,7 @@ import http from 'http';
 import app from './index'; // Importa a configuração do app
 import { initializeWebSocket } from './routes/websocket';
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Cria o servidor HTTP a partir do app Express
 const server = http.createServer(app).listen(port, () => {

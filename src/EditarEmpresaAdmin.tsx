@@ -36,7 +36,7 @@ export default function EditarEmpresaAdmin() {
 
   const fetchLideres = useCallback(async () => {
     try {
-      const response = await fetchAutenticado(`${apiUrl}/api/empresa/lideres`);
+      const response = await fetchAutenticado(`${apiUrl}/api/admin/empresas/${empresaId}/lideres`);
       if (!response.ok) {
         throw new Error('Falha ao buscar líderes.');
       }
@@ -98,7 +98,7 @@ export default function EditarEmpresaAdmin() {
     }
 
     try {
-      const response = await fetchAutenticado(`${apiUrl}/api/empresa/associar-lider`, {
+      const response = await fetchAutenticado(`${apiUrl}/api/admin/empresas/${empresaId}/associar-lider`, {
         method: 'POST',
         body: JSON.stringify({ email: data.email }),
       });

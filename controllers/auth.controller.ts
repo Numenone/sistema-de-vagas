@@ -12,15 +12,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-export const createUsuario = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const novoUsuario = await authService.createUsuario(req.body);
-    res.status(201).json(novoUsuario);
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const updateUsuario = async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const dados = req.body;

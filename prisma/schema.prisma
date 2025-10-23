@@ -18,7 +18,7 @@ model Usuario {
   nome                 String
   email                String        @unique
   senha                String
-  tipo                 String // "candidato", "lider", "admin"
+  tipo                 UserType      @default(candidato)
   fotoPerfil           String?
   ativo                Boolean       @default(true)
   empresaId            Int?
@@ -60,6 +60,8 @@ model Vaga {
   descricao    String
   requisitos   String
   salario      Float
+  modalidade   ModalidadeEnum
+  tipoContrato TipoContratoEnum
   ativa        Boolean  @default(true)
   empresaId    Int
 
@@ -80,14 +82,14 @@ model Candidatura {
   id        Int      @id @default(autoincrement())
   usuarioId Int
   vagaId    Int
-  descricao String   @default("")
-  status    String   @default("Enviada") // "Enviada", "Em Análise", "Aprovada", "Rejeitada"
+  descricao String?
+  status    StatusCandidatura @default(Enviada)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
-  vaga    Vaga    @relation(fields: [vagaId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  vaga    Vaga    @relation(fields: [vagaId], references: [id], onDelete: Cascade)
   mensagens Mensagem[]
 
   @@unique([usuarioId, vagaId], name: "unique_candidatura")
@@ -103,14 +105,14 @@ model Habilidade {
 
 model Atividade {
   id        Int      @id @default(autoincrement())
-  tipo      String // "NOVA_VAGA", "NOVA_CANDIDATURA"
+  tipo      TipoAtividade
   usuarioId Int?
   vagaId    Int?
 
   createdAt DateTime @default(now())
 
-  usuario Usuario? @relation(fields: [usuarioId], references: [id])
-  vaga    Vaga?    @relation(fields: [vagaId], references: [id])
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  vaga    Vaga?    @relation(fields: [vagaId], references: [id], onDelete: Cascade)
 
   @@index([usuarioId])
   @@index([vagaId])
@@ -125,9 +127,9 @@ model Mensagem {
   lida           Boolean  @default(false)
   createdAt      DateTime @default(now())
 
-  remetente    Usuario     @relation("MensagensEnviadas", fields: [remetenteId], references: [id])
-  destinatario Usuario     @relation("MensagensRecebidas", fields: [destinatarioId], references: [id])
-  candidatura  Candidatura @relation(fields: [candidaturaId], references: [id])
+  remetente    Usuario     @relation("MensagensEnviadas", fields: [remetenteId], references: [id], onDelete: Cascade)
+  destinatario Usuario     @relation("MensagensRecebidas", fields: [destinatarioId], references: [id], onDelete: Cascade)
+  candidatura  Candidatura @relation(fields: [candidaturaId], references: [id], onDelete: Cascade)
 
   @@index([remetenteId])
   @@index([destinatarioId])
@@ -144,4 +146,34 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   @@index([usuarioId])
+}
+
+
+enum UserType {
+  candidato
+  lider
+  admin
+}
+
+enum ModalidadeEnum {
+  REMOTO
+  HIBRIDO
+  PRESENCIAL
+}
+
+enum TipoContratoEnum {
+  CLT
+  PJ
+}
+
+enum StatusCandidatura {
+  Enviada
+  Em_Análise
+  Aprovada
+  Rejeitada
+}
+
+enum TipoAtividade {
+  NOVA_VAGA
+  NOVA_CANDIDATURA
 }

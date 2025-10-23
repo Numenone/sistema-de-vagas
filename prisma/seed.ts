@@ -40,12 +40,26 @@ async function main() {
   }
   console.log('Usuários inseridos.');
 
+  // 3. Habilidades (deve vir antes das Vagas)
+  for (const habilidade of dbData.habilidades) {
+    const { id: _id, ...data } = habilidade;
+    await prisma.habilidade.create({ data });
+  }
+  console.log('Habilidades inseridas.');
+
+  // 3. Habilidades (deve vir antes das Vagas)
+  for (const habilidade of dbData.habilidades) {
+    const { id: _id, ...data } = habilidade;
+    await prisma.habilidade.create({ data });
+  }
+  console.log('Habilidades inseridas.');
+
   // 3. Vagas
   for (const vaga of dbData.vagas) {
     const { id: _id, ...data } = vaga;
     // Adiciona valores padrão para campos que não estão no db.json
-    data.modalidade = data.modalidade || 'Não informado';
-    data.tipoContrato = data.tipoContrato || 'Não informado';
+    data.modalidade = data.modalidade || 'REMOTO'; // Use a valid enum value as default
+    data.tipoContrato = data.tipoContrato || 'CLT'; // Use a valid enum value as default
     await prisma.vaga.create({ data });
   }
   console.log('Vagas inseridas.');

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
-import { Pool } from '@neondatabase/serverless';
+import type { PoolConfig } from '@neondatabase/serverless';
 
 declare global {
   // allow global `var` declarations
@@ -9,9 +9,9 @@ declare global {
 }
 let prisma: PrismaClient;
 if (process.env.NODE_ENV === 'production') {
-  // Em produção (Vercel), usa o adaptador Neon para conexões serverless
-  const neon = new Pool({ connectionString: process.env.DATABASE_URL });
-  const adapter = new PrismaNeon(neon);
+  // In production (Vercel), pass the config directly to the adapter
+  const poolConfig: PoolConfig = { connectionString: process.env.DATABASE_URL };
+  const adapter = new PrismaNeon(poolConfig);
   prisma = new PrismaClient({ adapter });
 } else {
   // Em desenvolvimento, usa uma conexão TCP padrão e armazena em cache global

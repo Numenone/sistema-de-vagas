@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, FC } from 'react';
+import { Link } from 'react-router-dom';
 import { VictoryPie, VictoryLegend, VictoryLabel, VictoryChart, VictoryBar, VictoryAxis, VictoryTheme } from 'victory';
 import { 
   Briefcase, 
@@ -23,6 +24,7 @@ import {
   processVagasPorModalidade, // Adicionando a função que faltava
   formatTimelineDate,
 } from '../utils/dashboard.utils';
+import { useUsuarioStore } from '../context/UsuarioContext';
 
 type ChartType = 'empresa' | 'status' | 'salario' | 'topVagas' | 'modalidade';
 
@@ -92,6 +94,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeChart, setActiveChart] = useState<ChartType>('empresa');
   const [error, setError] = useState<string | null>(null);
+  const { fetchAutenticado } = useUsuarioStore(); // Pega a função de fetch autenticado
 
   useEffect(() => {
     async function fetchStats() {
@@ -100,9 +103,13 @@ export default function Dashboard() {
         setError(null);
 
         // Requisição única para o novo endpoint otimizado do backend
-        const response = await fetch(`${apiUrl}/api/dashboard-stats`);
+        const response = await fetchAutenticado(`${apiUrl}/api/admin/dashboard-stats`);
         if (!response.ok) throw new Error('Falha ao buscar dados do dashboard.');
-        const { stats: fetchedStats, vagas, candidaturas } = await response.json();
+        const data = await response.json();
+
+        // CORREÇÃO: Torna o código resiliente a diferentes formatos de resposta da API.
+        // Ele agora funciona se a API retornar { stats, vagas, ... } ou { data: { stats, vagas, ... } }.
+        const { stats: fetchedStats, vagas, candidaturas } = data.data || data;
 
         // 1. Usa as estatísticas já calculadas pelo backend
         setStats(fetchedStats);
@@ -127,7 +134,7 @@ export default function Dashboard() {
 
     // A rota já é protegida, então não precisamos verificar o tipo de usuário aqui.
     fetchStats();
-  }, []);
+  }, [fetchAutenticado]);
 
   const currentChart = useMemo(() => {
     switch (activeChart) {
@@ -201,6 +208,13 @@ const StatsCards: FC<{ stats: { totalVagas: number; totalCandidatos: number; tot
     <StatCard icon={Users} value={stats.totalCandidatos} label="Candidatos" color="text-green-600" />
     <StatCard icon={ClipboardList} value={stats.totalCandidaturas} label="Candidaturas" color="text-orange-600" />
     <StatCard icon={Building2} value={stats.totalEmpresas} label="Empresas" color="text-purple-600" />
+    <Link to="/admin/usuarios" className="card flex items-center p-4 gap-4 text-red-600">
+        <Users className="h-10 w-10" />
+        <div className="text-left">
+            <h3 className="text-2xl font-bold">Gerenciar</h3>
+            <p className="text-gray-600">Usuários</p>
+        </div>
+    </Link>
   </div>
 );
 

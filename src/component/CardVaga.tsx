@@ -44,18 +44,20 @@ export function CardVaga({ data }: { data: VagaType }) {
                 </button>
             )}
             <div className="flex justify-center items-center h-48 bg-gray-100 rounded-t-lg p-4">
-                <img 
-                    className="h-32 w-auto object-contain max-w-full"
-                    src={data.empresa.logo || `https://ui-avatars.com/api/?name=${data.empresa.nome.charAt(0)}&background=random`}
-                    alt={`Logo da ${data.empresa.nome}`}
-                    onError={(e) => {
-                        e.currentTarget.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNlNWU3ZWIiLz48dGV4dCB4PSIxMDAiIHk9IjUwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NzY4NkEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkxvZ28gTMOjbyBEaXNwb27DrXZlbDwvdGV4dD48L3N2Zz4=";
-                    }}
-                />
+                {data.empresa && (
+                    <img 
+                        className="h-32 w-auto object-contain max-w-full"
+                        src={data.empresa.logo || `https://ui-avatars.com/api/?name=${data.empresa.nome.charAt(0)}&background=random`}
+                        alt={`Logo da ${data.empresa.nome}`}
+                        onError={(e) => {
+                            e.currentTarget.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNlNWU3ZWIiLz48dGV4dCB4PSIxMDAiIHk9IjUwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NzY4NkEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkxvZ28gTMOjbyBEaXNwb27DrXZlbDwvdGV4dD48L3N2Zz4=";
+                        }}
+                    />
+                )}
             </div>
             <div className="p-5 flex flex-col flex-grow">
                 <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900">{data.titulo}</h5>
-                <p className="mb-4 font-normal text-gray-600">{data.empresa.nome}</p>
+                {data.empresa && <p className="mb-4 font-normal text-gray-600">{data.empresa.nome}</p>}
                 
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4">
                     <div className="flex items-center text-gray-600">

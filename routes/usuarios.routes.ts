@@ -1,24 +1,19 @@
-// import { Router } from 'express';
-// import {
-//   getAllUsuarios,
-//   getUsuarioById,
-//   createUsuario,
-//   updateUsuario,
-//   deleteUsuario,
-//   loginUsuario,
-// } from '../controllers/usuarios.controller';
-// import { validate } from '../middlewares/validate';
-// import { createUsuarioSchema, updateUsuarioSchema } from '../schemas/usuario.schema';
+import { Router } from 'express';
+import { createUsuario, getAllUsuarios, getUsuarioById } from '../controllers/usuarios.controller';
+import { authenticateToken } from '../middlewares/auth.middleware';
+import { isAdmin } from '../middlewares/admin.middleware';
+import { validate } from '../middlewares/validate';
+import { createUsuarioSchema } from '../schemas/usuario.schema';
 
-// const usuariosRouter = Router();
+const router = Router();
 
-// usuariosRouter.get('/', getAllUsuarios);
-// usuariosRouter.get('/:id', getUsuarioById);
-// usuariosRouter.post('/login', loginUsuario); // Nova rota para login
-// usuariosRouter.post('/', validate(createUsuarioSchema), createUsuario);
-// usuariosRouter.put('/:id', validate(createUsuarioSchema), updateUsuario);
-// usuariosRouter.patch('/:id', validate(updateUsuarioSchema), updateUsuario);
-// usuariosRouter.delete('/:id', deleteUsuario);
+// Rota para listar todos os usuários (protegida para admins)
+router.get('/', authenticateToken, isAdmin, getAllUsuarios);
 
-// export default usuariosRouter;
-// NOTE: This file seems to be replaced by auth.routes.ts. I'm commenting it out.
+// Rota para criar um novo usuário (pública)
+router.post('/', validate(createUsuarioSchema), createUsuario);
+
+// Rota para buscar um usuário específico por ID
+router.get('/:id', authenticateToken, getUsuarioById);
+
+export default router;

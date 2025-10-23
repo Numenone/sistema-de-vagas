@@ -30,7 +30,11 @@ export async function login(email: string, senha: string): Promise<{ usuario: Pa
     throw error;
   }
 
-  const token = jwt.sign({ id: usuario.id, tipo: usuario.tipo }, JWT_SECRET, { expiresIn: '1d' });
+  const token = jwt.sign(
+    { id: usuario.id, tipo: usuario.tipo, empresaId: usuario.empresaId }, 
+    JWT_SECRET, 
+    { expiresIn: '1d' }
+  );
 
   const { senha: _, ...usuarioSemSenha } = usuario;
 

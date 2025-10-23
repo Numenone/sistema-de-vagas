@@ -23,6 +23,12 @@ const upload = multer({ storage });
 // --- GET /api/admin/empresas (Admin lista todas as empresas) ---
 router.get('/', authenticateToken, isAdmin, adminEmpresasController.getEmpresas);
 
+// --- GET /api/admin/empresas/:id/lideres (Admin lista os líderes de uma empresa) ---
+router.get('/:id/lideres', authenticateToken, isAdmin, adminEmpresasController.getLideresByEmpresa);
+
+// --- POST /api/admin/empresas/:id/associar-lider (Admin associa um líder a uma empresa) ---
+router.post('/:id/associar-lider', authenticateToken, isAdmin, adminEmpresasController.associarNovoLider);
+
 // --- PATCH /api/admin/empresas/:id/status (Ativar/Desativar uma empresa) ---
 router.patch('/:id/status', authenticateToken, isAdmin, adminEmpresasController.updateStatusEmpresa);
 

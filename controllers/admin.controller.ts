@@ -31,3 +31,13 @@ export const updateStatusUsuario = async (req: Request, res: Response, next: Nex
     next(error);
   }
 };
+
+export const softDeleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const usuario = await adminService.softDeleteUser(Number(id));
+    res.json(usuario);
+  } catch (error) {
+    next(error);
+  }
+};

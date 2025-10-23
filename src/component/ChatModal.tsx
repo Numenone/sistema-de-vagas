@@ -33,7 +33,7 @@ export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState<boolean>(false);
-  const { usuario, fetchAutenticado } = useUsuarioStore();
+  const { usuario, fetchAutenticado, token } = useUsuarioStore();
   const { register, handleSubmit, reset } = useForm<{ conteudo: string }>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,7 +60,7 @@ export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
       authEndpoint: `${apiUrl}/api/pusher/auth`,
       auth: {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       },
     });
@@ -82,8 +82,10 @@ export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
     });
 
     channel.bind('new_message', (novaMensagem: Mensagem) => {
-      setIsOtherUserTyping(false);
-      setMensagens(prev => [...prev, novaMensagem]);
+      if (novaMensagem.remetenteId !== usuario.id) {
+        setIsOtherUserTyping(false);
+        setMensagens(prev => [...prev, novaMensagem]);
+      }
     });
 
     channel.bind('client-typing', (data: { isTyping: boolean }) => {
@@ -106,34 +108,65 @@ export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
         clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [candidatura.id, usuario.id, usuario.nome, fetchAutenticado]);
+  }, [candidatura.id, usuario.id, usuario.nome, fetchAutenticado, token]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [mensagens]);
 
   async function onSubmit(data: { conteudo: string }) {
+    const destinatarioId = usuario.id === candidatura.usuarioId
+        ? candidatura.vaga.empresa.lideres?.[0]?.id
+        : candidatura.usuarioId;
+
+    if (!destinatarioId) {
+        toast.error("Não foi possível identificar o destinatário da mensagem.");
+        return;
+    }
+
+    // Optimistic UI update
+    const tempId = Date.now();
+    const optimisticMessage: Mensagem = {
+      id: tempId,
+      conteudo: data.conteudo,
+      remetenteId: usuario.id,
+      createdAt: new Date().toISOString(),
+      lida: false,
+      remetente: {
+        nome: usuario.nome,
+        fotoPerfil: usuario.fotoPerfil || ''
+      }
+    };
+    setMensagens(prev => [...prev, optimisticMessage]);
+    reset();
+
     try {
       const response = await fetchAutenticado(`${apiUrl}/api/mensagens`, {
         method: 'POST',
         body: JSON.stringify({
           conteudo: data.conteudo,
-          // Determine the recipient ID
           destinatarioId: usuario.id === candidatura.usuarioId
-            ? candidatura.vaga.empresa.lideres?.[0]?.id // Use optional chaining for safer access
+            ? candidatura.vaga.empresa.lideres?.[0]?.id
             : candidatura.usuarioId,
           candidaturaId: candidatura.id,
         }),
       });
+
       if (!response.ok) {
         throw new Error('Falha ao enviar mensagem.');
       }
-      // Limpa o timeout de digitação e informa que parou de digitar
+
+      const sentMessage = await response.json();
+
+      // Replace optimistic message with the real one from the server
+      setMensagens(prev => prev.map(msg => msg.id === tempId ? sentMessage : msg));
+
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       triggerTypingEvent(false);
-      reset();
     } catch (error) {
       toast.error('Erro ao enviar mensagem.');
+      // Revert optimistic update on error
+      setMensagens(prev => prev.filter(msg => msg.id !== tempId));
     }
   }
 
@@ -152,12 +185,18 @@ export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
     }, 2000); // 2 seconds of inactivity
   };
 
+  const otherPerson = usuario.id === candidatura.usuarioId
+    ? candidatura.vaga.empresa.lideres?.[0]
+    : candidatura.usuario;
+
+  const chatTitle = otherPerson ? `Conversa com ${otherPerson.nome}` : "Chat";
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={onClose}>
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b flex justify-between items-center">
           <div>
-            <h2 className="text-lg font-bold">Conversa com {candidatura.usuario.nome}</h2>
+            <h2 className="text-lg font-bold">{chatTitle}</h2>
             <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
               {onlineUsers.some(u => u.id !== usuario.id) ? (
                 <>

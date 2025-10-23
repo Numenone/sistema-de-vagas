@@ -5,7 +5,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { authenticateToken } from '../middlewares/auth.middleware';
 import * as authController from '../controllers/auth.controller';
 import { validate } from '../middlewares/validate';
-import { createUsuarioSchema, updateUsuarioSchema } from '../schemas/usuario.schema';
+import { updateUsuarioSchema } from '../schemas/usuario.schema';
 
 const router = Router();
 
@@ -24,8 +24,6 @@ const upload = multer({ storage });
 // --- Rotas de Autenticação e Usuário ---
 
 router.post('/login', authController.login);
-
-router.post('/usuarios', validate(createUsuarioSchema), authController.createUsuario);
 
 router.patch('/usuarios/:id', authenticateToken, upload.single('fotoPerfil'), validate(updateUsuarioSchema), authController.updateUsuario);
 

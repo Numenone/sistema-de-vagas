@@ -17,4 +17,7 @@ router.patch('/usuarios/:id', adminController.updatePermissaoUsuario);
 // --- PATCH /api/admin/usuarios/:id/status (Ativar/Desativar um usuário) ---
 router.patch('/usuarios/:id/status', adminController.updateStatusUsuario);
 
+// --- PATCH /api/admin/usuarios/:id/soft-delete (Admin soft-deletes a user) ---
+router.patch('/usuarios/:id/soft-delete', adminController.softDeleteUser);
+
 export default router;

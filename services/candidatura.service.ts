@@ -11,7 +11,13 @@ export const getAll = async (query: any): Promise<Candidatura[]> => {
     where.vaga = { empresaId: Number(empresaId) };
   }
   if (status && status !== 'todas') {
-    where.status = status;
+    const statusMap: { [key: string]: any } = {
+      "Em Análise": "Em_Análise",
+      "Enviada": "Enviada",
+      "Aprovada": "Aprovada",
+      "Rejeitada": "Rejeitada",
+    };
+    where.status = statusMap[status] || status;
   }
   if (search && typeof search === 'string') {
     where.OR = [
@@ -25,7 +31,15 @@ export const getAll = async (query: any): Promise<Candidatura[]> => {
     where,
     include: {
       usuario: { select: { id: true, nome: true, email: true } },
-      vaga: { select: { id: true, titulo: true, empresa: { select: { nome: true } } } },
+      vaga: { 
+        include: { 
+          empresa: { 
+            include: { 
+              lideres: true 
+            } 
+          } 
+        } 
+      },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -36,11 +50,26 @@ export const getById = async (id: number): Promise<Candidatura | null> => {
 };
 
 export const create = async (data: Prisma.CandidaturaCreateInput): Promise<Candidatura> => {
-  return prisma.candidatura.create({ data });
+  const createData = { ...data, status: 'Enviada' as const };
+
+  return prisma.candidatura.create({ data: createData });
 };
 
-export const update = async (id: number, data: Prisma.CandidaturaUpdateInput): Promise<Candidatura> => {
-  return prisma.candidatura.update({ where: { id }, data });
+export const update = async (id: number, data: any): Promise<Candidatura> => {
+  const { status, ...rest } = data;
+  const updateData: Prisma.CandidaturaUpdateInput = { ...rest };
+
+  if (status) {
+    const statusMap: { [key: string]: any } = {
+      "Em Análise": "Em_Análise",
+      "Enviada": "Enviada",
+      "Aprovada": "Aprovada",
+      "Rejeitada": "Rejeitada",
+    };
+    updateData.status = statusMap[status] || status;
+  }
+
+  return prisma.candidatura.update({ where: { id }, data: updateData });
 };
 
 export const remove = async (id: number): Promise<Candidatura> => {

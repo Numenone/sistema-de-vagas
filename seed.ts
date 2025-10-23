@@ -43,10 +43,20 @@ async function main() {
   }
   console.log('Usuários inseridos.');
 
+  // 3. Habilidades (deve vir antes das Vagas)
+  for (const habilidade of dbData.habilidades) {
+    const { id: _id, ...data } = habilidade;
+    await prisma.habilidade.create({ data });
+  }
+  console.log('Habilidades inseridas.');
+
   // 3. Vagas
   for (const vaga of dbData.vagas) {
     const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...data } = vaga;
     try {
+      // Provide default values for required enum fields if they are missing
+      data.modalidade = data.modalidade || 'REMOTO';
+      data.tipoContrato = data.tipoContrato || 'CLT';
       // Garante que o salário é um número
       data.salario = Number(data.salario);
       await prisma.vaga.create({ data });

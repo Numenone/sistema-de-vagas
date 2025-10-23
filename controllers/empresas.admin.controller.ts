@@ -40,3 +40,16 @@ export const restoreEmpresa = async (req: Request, res: Response) => {
   const empresaRestaurada = await adminEmpresasService.restore(Number(id));
   res.json(empresaRestaurada);
 };
+
+export async function getLideresByEmpresa(req: Request, res: Response) {
+  const { id } = req.params;
+  const lideres = await adminEmpresasService.getLideresByEmpresa(Number(id));
+  res.json(lideres);
+}
+
+export const associarNovoLider = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { email } = req.body;
+  await adminEmpresasService.associarLider(email, Number(id));
+  res.status(200).json({ message: `Usuário com e-mail ${email} foi promovido a líder.` });
+};

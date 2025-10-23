@@ -89,6 +89,31 @@ export default function GerenciarUsuarios() {
     }
   }
 
+  async function handleSoftDelete(userId: number) {
+    if (userId === adminUsuario.id) {
+      toast.warning('Você não pode deletar sua própria conta.');
+      return;
+    }
+
+    if (!confirm(`Deseja realmente deletar este usuário? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetchAutenticado(`${apiUrl}/api/admin/usuarios/${userId}/soft-delete`, {
+        method: 'PATCH',
+      });
+
+      if (!response.ok) throw new Error('Falha ao deletar usuário.');
+
+      toast.success(`Usuário deletado com sucesso!`);
+      // Optimistically update the UI
+      setUsuarios(prev => prev.filter(user => user.id !== userId));
+    } catch (error) {
+      toast.error(`Erro ao deletar usuário.`);
+    }
+  }
+
   const roleIcons: Record<UserRole, React.ElementType> = {
     candidato: User,
     lider: UserCog,
@@ -144,6 +169,12 @@ export default function GerenciarUsuarios() {
                       className={user.ativo ? 'btn-danger' : 'btn-success'}
                       disabled={user.id === adminUsuario.id}>
                       {user.ativo ? 'Desativar' : 'Ativar'}
+                    </button>
+                    <button
+                      onClick={() => handleSoftDelete(user.id)}
+                      className='btn-danger ml-2'
+                      disabled={user.id === adminUsuario.id}>
+                      Soft Delete
                     </button>
                   </td>
                 </tr>

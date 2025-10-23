@@ -1,3 +1,5 @@
+import { Empresa } from "@prisma/client"
+
 export type UsuarioType = {
     id: number
     nome: string
@@ -9,4 +11,5 @@ export type UsuarioType = {
     ativo: boolean
     createdAt: Date
     updatedAt: Date
+    empresa?: Empresa
 }

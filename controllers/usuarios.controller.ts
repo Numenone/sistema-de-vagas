@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as UsuarioService from '../services/usuario.service';
+import * as authService from '../services/auth.service';
 
 export const getAllUsuarios = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -26,7 +27,8 @@ export const getUsuarioById = async (req: Request, res: Response, next: NextFunc
 
 export const createUsuario = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const novoUsuario = await UsuarioService.create(req.body);
+    // Reutiliza o serviço de autenticação que lida com a criação e hash de senha
+    const novoUsuario = await authService.createUsuario(req.body);
     res.status(201).json(novoUsuario);
   } catch (error) {
     next(error);

@@ -16,7 +16,7 @@ type Inputs = {
 export default function Detalhes() {
   const params = useParams()
   const [vagaPrincipal, setVagaPrincipal] = useState<VagaType | null>(null)
-  const [vagasSimilares, setVagasSimilares] = useState<VagaType[]>([])
+  const [similares, setSimilares] = useState<VagaType[]>([])
   const { usuario, fetchAutenticado } = useUsuarioStore()
   const { register, handleSubmit, reset } = useForm<Inputs>()
 
@@ -28,9 +28,9 @@ export default function Detalhes() {
         if (!response.ok) {
           throw new Error('Vaga não encontrada');
         }
-        const { vaga, vagasSimilares } = await response.json()
+        const { vaga, similares } = await response.json()
         setVagaPrincipal(vaga)
-        setVagasSimilares(vagasSimilares)
+        setSimilares(similares)
       } catch (error) {
         console.error("Erro ao buscar vaga:", error)
         toast.error("Erro ao carregar vaga")
@@ -152,11 +152,11 @@ export default function Detalhes() {
         </div>
       </section>
 
-      {vagasSimilares.length > 0 && (
+      {similares.length > 0 && (
         <section className="mt-12">
           <h2 className="text-2xl font-bold mb-6">Vagas Similares</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {vagasSimilares.map(vaga => (
+            {similares.map(vaga => (
               <CardVaga key={vaga.id} data={vaga} />
             ))}
           </div>

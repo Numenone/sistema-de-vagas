@@ -4,6 +4,7 @@ import { InputPesquisa } from "./component/InputPesquisa";
 import type { VagaType } from "./utils/VagaType";
 import { FeedAtividades } from "./component/FeedAtividades"; 
 import type { HabilidadeType } from "./utils/HabilidadeType";
+import { CardVagaSkeleton } from "./component/CardVagaSkeleton"; // Importa o novo componente
 import React from 'react'
 import { PaginationControls } from "./component/PaginationControls";
 
@@ -43,14 +44,15 @@ export default function App() {
         if (filtros.habilidades.length > 0) {
           params.append('habilidades', filtros.habilidades.join(','));
         }
-        params.append('page', pagination.currentPage.toString());
+        params.append('page', (pagination.currentPage || 1).toString());
+        params.append('_expand', 'empresa');
         
         const response = await fetch(`${apiUrl}/api/vagas?${params.toString()}`);
         if (!response.ok) {
           throw new Error('Falha ao carregar vagas.');
         }
         const { vagas: dados, totalPages, currentPage } = await response.json();
-        setVagas(dados);
+        setVagas(dados || []); // Garante que vagas seja sempre um array
         setPagination({ totalPages, currentPage });
       } catch (error) {
         console.error("Erro ao buscar vagas:", error);
@@ -234,11 +236,17 @@ export default function App() {
         </div>
 
           {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-4 text-gray-600">Buscando vagas...</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <h2 className="text-2xl font-bold mb-6">Vagas Disponíveis</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <CardVagaSkeleton key={index} />
+                  ))}
+                </div>
               </div>
-            ) : vagas.length === 0 ? (
+            </div>
+          ) : vagas.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🔍</div>
                 <h3 className="text-xl font-semibold mb-2">Nenhuma vaga encontrada</h3>
@@ -270,7 +278,12 @@ export default function App() {
                   </div>
                 )}
               </div>
-
+          {vagas.length > 0 && pagination.totalPages > 1 && (
+            <div className="mt-8 flex justify-center col-span-full lg:col-span-2">
+              <PaginationControls currentPage={pagination.currentPage} totalPages={pagination.totalPages} onPageChange={handlePageChange} />
+            </div>
+          )}
+          
           <div className="lg:col-span-1">
             <FeedAtividades />
           </div>

@@ -39,7 +39,12 @@ export const getVagaByIdWithSimilares = async (req: Request, res: Response, next
 };
 export const createVaga = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const novaVaga = await VagaService.create(req.body);
+        const dadosVaga = req.body;
+        if (!dadosVaga.empresaId && req.usuario?.tipo === 'lider' && req.usuario.empresaId) {
+        dadosVaga.empresaId = req.usuario.empresaId;
+       }
+
+    const novaVaga = await VagaService.create(dadosVaga);
     res.status(201).json(novaVaga);
   } catch (error) {
     next(error);

@@ -15,6 +15,7 @@ interface UsuarioState {
   fetchAutenticado: (url: string, options?: RequestInit) => Promise<Response>;
   fetchFavoritos: () => Promise<void>;
   fetchUnreadCount: () => Promise<void>;
+  atualizaToken: (token: string) => void;
 }
 
 const usuarioVazio: UsuarioType = {
@@ -44,6 +45,19 @@ export const useUsuarioStore = create<UsuarioState>((set, get) => ({
     }
     get().fetchFavoritos();
     get().fetchUnreadCount();
+  },
+
+  atualizaToken: (token: string) => {
+    const { usuario } = get();
+    set({ token });
+    // Atualiza o token no storage, mantendo a preferência do usuário (localStorage vs sessionStorage)
+    const usuarioSalvoEmLocalStorage = localStorage.getItem('usuario');
+    if (usuarioSalvoEmLocalStorage) {
+      localStorage.setItem('usuario', JSON.stringify({ usuario, token }));
+    } else {
+      // Se não estiver no localStorage, deve estar no sessionStorage (ou em nenhum)
+      sessionStorage.setItem('usuario', JSON.stringify({ usuario, token }));
+    }
   },
 
   deslogaUsuario: () => {

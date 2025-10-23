@@ -3,8 +3,8 @@ import * as dashboardService from '../services/dashboard.service';
 
 export const getDashboardStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await dashboardService.getDashboardData();
-    res.json(data);
+    const stats = await dashboardService.getOverallStats();
+    res.json(stats);
   } catch (error) {
     next(error);
   }

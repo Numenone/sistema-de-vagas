@@ -1,13 +1,22 @@
 import { prisma } from '../lib/prisma';
 import { Vaga, Prisma } from '@prisma/client';
 
-export const getAll = async (query: any): Promise<Vaga[]> => {
-  const { q, ativa, _expand, adminSearch} = query;
+export const getAll = async (query: any): Promise<{ vagas: Vaga[], totalPages: number, currentPage: number }> => {
+  const { q, ativa, _expand, adminSearch, page = 1 } = query;
   const where: Prisma.VagaWhereInput = {
-    // Garante que vagas de empresas inativas nunca sejam mostradas, exceto no painel de admin
     empresa: adminSearch ? undefined : { ativo: true },
   };
-  if (ativa === 'true') where.ativa = true;
+
+  if (!adminSearch) {
+    where.ativa = true;
+  } else {
+    if (ativa === 'true') {
+      where.ativa = true;
+    } else if (ativa === 'false') {
+      where.ativa = false;
+    }
+  }
+
   if (q) {
     where.OR = [
       { titulo: { contains: q as string, mode: 'insensitive' } },
@@ -16,7 +25,18 @@ export const getAll = async (query: any): Promise<Vaga[]> => {
   }
   const include: Prisma.VagaInclude = {};
   if (_expand === 'empresa') include.empresa = true;
-  return prisma.vaga.findMany({ where, include });
+
+  const pageSize = 10;
+  const skip = (page - 1) * pageSize;
+
+  const [vagas, totalVagas] = await prisma.$transaction([
+    prisma.vaga.findMany({ where, include, take: pageSize, skip }),
+    prisma.vaga.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(totalVagas / pageSize);
+
+  return { vagas, totalPages, currentPage: page };
 };
 
 export const getById = async (id: number, query: any): Promise<Vaga | null> => {
@@ -53,8 +73,25 @@ export const create = async (data: Prisma.VagaCreateInput): Promise<Vaga> => {
   return prisma.vaga.create({ data });
 };
 
-export const update = async (id: number, data: Prisma.VagaUpdateInput): Promise<Vaga> => {
-  return prisma.vaga.update({ where: { id }, data });
+export const update = async (id: number, data: any): Promise<Vaga> => {
+  const { habilidades, ...vagaData } = data;
+
+  if (habilidades) {
+    vagaData.habilidades = {
+      set: [],
+      connectOrCreate: habilidades.map((habilidade: string) => {
+        return {
+          where: { nome: habilidade },
+          create: { nome: habilidade },
+        };
+      }),
+    };
+  }
+
+  return prisma.vaga.update({
+    where: { id },
+    data: vagaData,
+  });
 };
 
 export const remove = async (id: number): Promise<Vaga> => {

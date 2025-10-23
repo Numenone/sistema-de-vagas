@@ -1,11 +1,11 @@
 import { Router } from 'express';
+import * as dashboardController from '../controllers/dashboard.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 import { isAdmin } from '../middlewares/admin.middleware';
-import * as dashboardController from './dashboard.controller';
 
 const router = Router();
 
-// Protege a rota para ser acessível apenas por administradores
-router.get('/stats', authenticateToken, isAdmin, dashboardController.getDashboardStats);
+// Rota para obter estatísticas gerais do dashboard (protegida para admins)
+router.get('/', authenticateToken, isAdmin, dashboardController.getDashboardStats);
 
 export default router;
