@@ -24,18 +24,25 @@ export async function sendPasswordResetEmail(to: string, token: string) {
     from: process.env.EMAIL_FROM,
     to,
     subject: 'Redefinição de Senha - LinkedOut',
-    html: `
-      <div style="font-family: sans-serif; text-align: center; padding: 20px;">
-        <h2>Redefinição de Senha</h2>
-        <p>Você solicitou a redefinição da sua senha. Clique no botão abaixo para continuar:</p>
-        <a 
-          href="${resetUrl}" 
-          style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;"
-        >
-          Redefinir Senha
-        </a>
-        <p style="margin-top: 20px; font-size: 12px; color: #888;">
-          Se você não solicitou isso, por favor, ignore este e-mail.
+    html: `      <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <h2 style="color: #2563eb; text-align: center;">Redefinição de Senha</h2>
+        <p>Olá,</p>
+        <p>Você solicitou a redefinição da sua senha para sua conta no LinkedOut.</p>
+        <p>Para continuar, clique no link abaixo ou copie e cole o token na página de redefinição de senha.</p>
+        
+        <p style="margin-top: 25px;"><strong>Link para redefinição:</strong></p>
+        <p><a href="${resetUrl}" style="color: #2563eb; text-decoration: underline; word-break: break-all;">${resetUrl}</a></p>
+        
+        <p style="margin-top: 25px;"><strong>Ou use este token:</strong></p>
+        <p style="background-color: #f3f4f6; border: 1px solid #d1d5db; padding: 10px; border-radius: 5px; font-family: monospace; word-break: break-all;">
+          ${token}
+        </p>
+
+        <p style="margin-top: 25px; font-size: 12px; color: #6b7280;">
+          Este link e token expirarão em <strong>1 hora</strong>.
+        </p>
+        <p style="font-size: 12px; color: #6b7280;">
+          Se você não solicitou esta alteração, por favor, ignore este e-mail. Sua senha permanecerá a mesma.
         </p>
       </div>
     `,
