@@ -18,7 +18,7 @@ cloudinary.config({
 });
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: { folder: 'linkedont_empresas', allowed_formats: ['jpg', 'png', 'jpeg'] } as any,
+  params: { folder: 'linkedont_empresas', allowed_formats: ['jpg', 'png', 'jpeg', 'webp'] } as any,
 });
 const upload = multer({ storage });
 

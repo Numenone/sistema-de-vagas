@@ -17,7 +17,7 @@ cloudinary.config({
 });
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: { folder: 'linkedont_logos', allowed_formats: ['jpg', 'png', 'jpeg'] } as any,
+  params: { folder: 'linkedont_logos', allowed_formats: ['jpg', 'png', 'jpeg', 'webp'] } as any,
 });
 const upload = multer({ storage });
 

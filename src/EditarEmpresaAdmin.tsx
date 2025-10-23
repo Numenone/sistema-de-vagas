@@ -136,17 +136,26 @@ export default function EditarEmpresaAdmin() {
           />
           <div>
             <label htmlFor="logo" className="btn-secondary cursor-pointer">Trocar Logo</label>
-            <input type="file" id="logo" className="hidden" {...register("logo")} accept="image/*" />
+            <input type="file" id="logo" className="hidden" {...register("logo")} accept="image/png, image/jpeg, image/webp" />
+            <p className="text-xs text-gray-500 mt-1">PNG, JPG ou WEBP.</p>
           </div>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label htmlFor="nome" className="block mb-2 text-sm font-medium">Nome da Empresa</label>
-            <input type="text" id="nome" className="form-input" required {...register("nome")} />
+            <input type="text" id="nome" className="form-input" required minLength={3} maxLength={50} {...register("nome")} />
           </div>
           <div>
             <label htmlFor="descricao" className="block mb-2 text-sm font-medium">Descrição</label>
-            <textarea id="descricao" className="form-input" rows={5} required {...register("descricao")} />
+            <textarea
+              id="descricao"
+              className="form-input"
+              rows={5}
+              required
+              minLength={10}
+              maxLength={500}
+              {...register("descricao")} />
+            <p className="text-xs text-gray-500 mt-1">Mínimo de 10 e máximo de 500 caracteres.</p>
           </div>
           <div className="flex gap-4">
             <button type="submit" className="btn-primary">
