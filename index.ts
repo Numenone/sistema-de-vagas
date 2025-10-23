@@ -9,32 +9,26 @@ import { errorHandler } from './middlewares/errorHandler.js';
 const __dirname = path.resolve();
 const app = express();
 
-// --- Configuração de CORS ---
-// Lista de domínios permitidos a fazer requisições para a API.
-const allowedOrigins = [
-  'https://sistema-de-vagas-nine.vercel.app', // Nova URL de preview do frontend
-  'https://sistema-de-vagas-nine.vercel.app', // URL de preview antiga
-  process.env.FRONTEND_URL, // URL do frontend em desenvolvimento (ex: http://localhost:5173)
-];
-
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    // Permite requisições da lista de permitidos e requisições sem 'origin' (como Postman ou apps mobile)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-};
-
-// Habilita o CORS com as opções configuradas para todas as rotas.
-app.use(cors(corsOptions));
+app.options('*', cors()) // enable pre-flight request for all routes
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Todas as rotas da API serão prefixadas com /api
 app.use('/api', routes);
+
+// --- Servir Arquivos Estáticos e Rota Catch-all para a SPA ---
+// Apenas em ambiente de produção (ex: quando não estiver em desenvolvimento com o Vite)
+if (process.env.NODE_ENV === 'production') {
+  // Servir arquivos estáticos do build do frontend
+  app.use(express.static(path.join(__dirname, 'dist')));
+
+  // Rota Catch-all para a SPA (Single Page Application)
+  // Deve vir DEPOIS das rotas da API
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+}
 
 // Middleware de tratamento de erros global (deve ser o último)
 app.use(errorHandler);
