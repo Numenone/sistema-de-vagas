@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import * as adminEmpresasService from '../services/empresas.admin.service.js';
-import { createEmpresaSchema } from '../schemas/empresa.schema.js';
 
 export async function getEmpresas(req: Request, res: Response) {
   const { search } = req.query;
