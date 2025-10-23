@@ -4,9 +4,8 @@
     "composite": true,
     "module": "ESNext",
     "moduleResolution": "Node",
-    "types": ["node"]
-    // "noEmit": false, // Removido para permitir a compilação
-    "outDir": "dist"
+    "types": ["node"],
+    "noEmit": false
   },
-  "include": ["index.ts", "middlewares/**/*.ts", "routes/**/*.ts", "services/**/*.ts", "schemas/**/*.ts", "lib/**/*.ts", "controllers/**/*.ts", "types/**/*.ts"]
+  "include": ["vite.config.ts", "server.ts", "index.ts", "middlewares/**/*.ts", "routes/**/*.ts", "services/**/*.ts", "schemas/**/*.ts", "lib/**/*.ts", "prisma/**/*.ts", "seed.ts", "controllers/**/*.ts", "types/**/*.ts", "sw.ts"]
 }
