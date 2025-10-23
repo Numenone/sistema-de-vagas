@@ -1,208 +1,21 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authenticateToken } from '../middlewares/auth.middleware';
+import * as vagasController from '../controllers/vagas.controller';
+import { validate } from '../middlewares/validate';
+import { createVagaSchema, updateVagaSchema } from '../schemas/vaga.schema';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // --- GET /api/vagas (Listar vagas com filtros e paginação) ---
-router.get('/', async (req, res) => {
-    const { q, salario, empresaNome, status, page = '1', limit = '10', empresaId, modalidade, tipoContrato, habilidades, adminSearch } = req.query;
-
-    try {
-        const pageNum = parseInt(page as string, 10);
-        const pageSize = parseInt(limit as string, 10);
-        const skip = (pageNum - 1) * pageSize;
-
-        const where: any = {};
-
-        // O filtro de admin ignora o status 'ativa', a menos que seja especificado
-        if (status !== 'all' && !adminSearch) {
-            where.ativa = true;
-        }
-
-        if (empresaId) {
-            where.empresaId = Number(empresaId);
-        }
-
-        // Filtro de busca principal (página inicial)
-        if (q && typeof q === 'string') {
-            where.OR = [
-                { titulo: { contains: q, mode: 'insensitive' } },
-                { descricao: { contains: q, mode: 'insensitive' } },
-                { requisitos: { contains: q, mode: 'insensitive' } },
-            ];
-        }
-
-        // Filtro de busca específico para a página de admin
-        if (adminSearch && typeof adminSearch === 'string') {
-            where.OR = [
-                { titulo: { contains: adminSearch, mode: 'insensitive' } },
-                { empresa: { nome: { contains: adminSearch, mode: 'insensitive' } } },
-            ];
-        }
-
-        if (salario && typeof salario === 'string') {
-            const [min, max] = salario.split('-').map(Number);
-            where.salario = {};
-            if (!isNaN(min)) where.salario.gte = min;
-            if (max) where.salario.lte = max;
-        }
-
-        if (empresaNome && typeof empresaNome === 'string') {
-            where.empresa = { nome: empresaNome };
-        }
-
-        if (modalidade && typeof modalidade === 'string') {
-            where.modalidade = modalidade;
-        }
-
-        if (tipoContrato && typeof tipoContrato === 'string') {
-            where.tipoContrato = tipoContrato;
-        }
-
-        if (habilidades && typeof habilidades === 'string') {
-            const listaHabilidades = habilidades.split(',');
-            where.habilidades = { some: { nome: { in: listaHabilidades, mode: 'insensitive' } } };
-        }
-
-        const [vagas, totalVagas] = await prisma.$transaction([
-            prisma.vaga.findMany({
-                where,
-                include: { empresa: true },
-                skip,
-                take: pageSize,
-                orderBy: { createdAt: 'desc' }
-            }),
-            prisma.vaga.count({ where })
-        ]);
-
-        res.json({
-            vagas,
-            totalPages: Math.ceil(totalVagas / pageSize),
-            currentPage: pageNum,
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar vagas' });
-    }
-});
+router.get('/', vagasController.getAllVagas);
 
 // --- POST /api/vagas (Criar vaga) ---
-router.post('/', authenticateToken, async (req, res) => {
-    const { titulo, descricao, requisitos, salario, modalidade, tipoContrato, empresaId: adminEmpresaId } = req.body;
-    const user = req.usuario;
-
-    let empresaId: number | undefined;
-
-    if (user?.tipo === 'lider') {
-        empresaId = user.empresaId ?? undefined;
-    } else if (user?.tipo === 'admin') {
-        empresaId = Number(adminEmpresaId);
-    }
-
-    if (!empresaId) {
-        return res.status(403).json({ error: 'Acesso negado ou empresa não especificada.' });
-    }
-
-    try {
-        const novaVaga = await prisma.vaga.create({
-            data: { 
-                titulo,
-                descricao,
-                requisitos,
-                salario: Number(salario),
-                empresaId,
-                modalidade: modalidade || 'Presencial',
-                tipoContrato: tipoContrato || 'CLT',
-                ativa: true
-            },
-        });
-        res.status(201).json(novaVaga);
-    } catch (error) {
-        res.status(500).json({ error: 'Erro interno ao criar vaga' });
-    }
-});
+router.post('/', authenticateToken, validate(createVagaSchema), vagasController.createVaga);
 
 // --- GET /api/vagas/:id (Buscar uma vaga) ---
-router.get('/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const vaga = await prisma.vaga.findUnique({
-            where: { id: Number(id) },
-            include: {
-                empresa: true,
-                habilidades: true // Inclui as habilidades da vaga principal
-            },
-        });
-
-        if (!vaga) {
-            return res.status(404).json({ error: 'Vaga não encontrada' });
-        }
-
-        // Busca por vagas similares
-        const habilidadesIds = vaga.habilidades.map(h => h.id);
-        const vagasSimilares = await prisma.vaga.findMany({
-            where: {
-                id: { not: vaga.id }, // Exclui a própria vaga
-                ativa: true,
-                OR: [
-                    { empresaId: vaga.empresaId }, // Da mesma empresa
-                    { habilidades: { some: { id: { in: habilidadesIds } } } } // Com pelo menos uma habilidade em comum
-                ]
-            },
-            include: { empresa: true },
-            take: 3 // Limita a 3 vagas similares
-        });
-
-        res.json({
-            vaga,
-            vagasSimilares
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar vaga' });
-    }
-});
+router.get('/:id', vagasController.getVagaByIdWithSimilares);
 
 // --- PATCH /api/vagas/:id (Atualizar vaga) ---
-router.patch('/:id', authenticateToken, async (req, res) => {
-    const { id } = req.params;
-    const { titulo, descricao, requisitos, salario, modalidade, tipoContrato, ativa } = req.body;
-
-    try {
-        if (req.usuario?.tipo === 'lider') {
-            const vaga = await prisma.vaga.findUnique({ where: { id: Number(id) } });
-            if (vaga?.empresaId !== req.usuario.empresaId) {
-                return res.status(403).json({ error: 'Acesso negado para editar esta vaga.' });
-            }
-        } else if (req.usuario?.tipo !== 'admin') {
-            return res.status(403).json({ error: 'Acesso negado.' });
-        }
-
-        const dataToUpdate: any = {};
-
-        // Admin e Líder podem alterar o status
-        if (typeof ativa === 'boolean') {
-            dataToUpdate.ativa = ativa;
-        }
-
-        // Apenas Admin pode alterar os outros campos
-        if (req.usuario?.tipo === 'admin') {
-            if (titulo) dataToUpdate.titulo = titulo;
-            if (descricao) dataToUpdate.descricao = descricao;
-            if (requisitos) dataToUpdate.requisitos = requisitos;
-            if (salario) dataToUpdate.salario = Number(salario);
-            if (modalidade) dataToUpdate.modalidade = modalidade;
-            if (tipoContrato) dataToUpdate.tipoContrato = tipoContrato;
-        }
-
-        const vagaAtualizada = await prisma.vaga.update({
-            where: { id: Number(id) },
-            data: dataToUpdate,
-        });
-        res.json(vagaAtualizada);
-    } catch (error) {
-        res.status(500).json({ error: 'Erro interno ao atualizar vaga' });
-    }
-});
+router.patch('/:id', authenticateToken, validate(updateVagaSchema), vagasController.updateVaga);
 
 export default router;

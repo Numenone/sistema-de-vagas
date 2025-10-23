@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response} from 'express';
 import * as CandidaturaService from '../services/candidatura.service';
 
 export const getAllCandidaturasByEmpresa = async (req: Request, res: Response) => {

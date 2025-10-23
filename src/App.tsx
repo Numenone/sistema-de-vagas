@@ -64,11 +64,13 @@ export default function App() {
 
   // useEffect com DEBOUNCE para o filtro de texto
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setPagination(prev => ({ ...prev, currentPage: 1 })); // Apenas reseta a página, a busca é acionada pela mudança em 'filtros'
-    }, 500); // Atraso de 500ms
+    if (filtros.termo !== "") { // Only run debounce if there is a search term
+      const timer = setTimeout(() => {
+        setPagination(prev => ({ ...prev, currentPage: 1 }));
+      }, 500); // Atraso de 500ms
 
-    return () => clearTimeout(timer); // Limpa o timer se o usuário digitar novamente
+      return () => clearTimeout(timer); // Limpa o timer se o usuário digitar novamente
+    }
   }, [filtros.termo]);
 
   // Busca a lista de empresas uma única vez para popular o dropdown (usando o endpoint dedicado)

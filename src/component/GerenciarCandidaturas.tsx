@@ -1,22 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useUsuarioStore } from '../context/UsuarioContext';
-import type { CandidaturaType } from '../utils/CandidaturaType';
+import { type CandidaturaType, STATUS_CANDIDATURA, type StatusCandidatura, statusStyles } from '../utils/CandidaturaType';
 import { Search, Filter } from 'lucide-react';
 
 const apiUrl = import.meta.env.VITE_API_URL;
-
-const STATUS_CANDIDATURA = ['Enviada', 'Em Análise', 'Aprovada', 'Rejeitada'] as const;
-type StatusCandidatura = typeof STATUS_CANDIDATURA[number];
-
-const statusStyles: Record<StatusCandidatura, string> = {
-  Enviada: 'bg-blue-100 text-blue-800 border-blue-200',
-  'Em Análise': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  Aprovada: 'bg-green-100 text-green-800 border-green-200',
-  Rejeitada: 'bg-red-100 text-red-800 border-red-200',
-};
-
-
 
 export default function GerenciarCandidaturas() {
   const [candidaturas, setCandidaturas] = useState<CandidaturaType[]>([]);

@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.ts';
+import { prisma } from '../lib/prisma';
 import { Usuario, Prisma } from '@prisma/client';
 
 export const getAll = async (query: any): Promise<Usuario[]> => {
@@ -14,7 +14,12 @@ export const getById = async (id: number): Promise<Usuario | null> => {
 };
 
 export const getByEmailAndPassword = async (email: string, senha: string): Promise<Usuario | null> => {
-  return prisma.usuario.findFirst({ where: { email, senha } });
+  return prisma.usuario.findFirst({
+    where: {
+      email: { equals: email, mode: 'insensitive' },
+      senha
+    }
+  });
 };
 
 export const create = async (data: Prisma.UsuarioCreateInput): Promise<Usuario> => {

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import Pusher from 'pusher-js';
 import type { Members, PresenceChannel } from 'pusher-js';
-import { useUsuarioStore, UsuarioStore } from '../context/UsuarioContext';
+import { useUsuarioStore } from '../context/UsuarioContext';
 import type { CandidaturaType } from '../utils/CandidaturaType';
 import { Send } from 'lucide-react';
 
@@ -32,8 +32,8 @@ type ChatModalProps = {
 export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
-  const { usuario, fetchAutenticado } = useUsuarioStore() as UsuarioStore;
+  const [isOtherUserTyping, setIsOtherUserTyping] = useState<boolean>(false);
+  const { usuario, fetchAutenticado } = useUsuarioStore();
   const { register, handleSubmit, reset } = useForm<{ conteudo: string }>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -120,7 +120,7 @@ export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
           conteudo: data.conteudo,
           // Determine the recipient ID
           destinatarioId: usuario.id === candidatura.usuarioId
-            ? candidatura.vaga.empresa.lideres[0]?.id // Assuming the first leader is the contact
+            ? candidatura.vaga.empresa.lideres?.[0]?.id // Use optional chaining for safer access
             : candidatura.usuarioId,
           candidaturaId: candidatura.id,
         }),
@@ -169,7 +169,7 @@ export default function ChatModal({ candidatura, onClose }: ChatModalProps) {
           <p className="text-sm text-gray-500">Vaga: {candidatura.vaga.titulo}</p>
         </div>
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
-          {mensagens.map((msg, index) => (
+          {mensagens.map((msg) => (
             <div key={msg.id} className={`flex items-end gap-2 ${msg.remetenteId === usuario.id ? 'justify-end' : 'justify-start'}`}>
               {msg.remetenteId !== usuario.id && (
                 <img src={msg.remetente.fotoPerfil} alt={msg.remetente.nome} className="w-8 h-8 rounded-full" />

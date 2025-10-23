@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUsuarioStore } from '../context/UsuarioContext';
 import { Bell, BellOff } from 'lucide-react';
-import { subscribeToPush } from '../utils/push'; // This path is now correct
+import { subscribeToPush } from '../utils/push';
 
 type NavLink = {
   to: string;
@@ -47,7 +47,7 @@ export default function UserMenu() {
     const permission = await Notification.requestPermission();
     setNotificationPermission(permission);
     if (permission === 'granted') {
-      subscribeToPush(fetchAutenticado); // This path is now correct
+      subscribeToPush(fetchAutenticado);
     }
   }
 
@@ -94,11 +94,11 @@ export default function UserMenu() {
 
       {notificationPermission === 'default' && (
         <button onClick={handleNotificationRequest} className="btn-secondary p-2" title="Ativar notificações">
-          <BellOff size={18} />
+          <BellOff size={18} aria-label="Ativar notificações" />
         </button>
       )}
       {notificationPermission === 'granted' && (
-        <Bell size={18} className="text-green-400" title="Notificações ativadas" />
+        <Bell size={18} className="text-green-400" aria-label="Notificações ativadas" />
       )}
       
       <button 

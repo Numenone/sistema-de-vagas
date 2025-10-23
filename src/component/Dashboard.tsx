@@ -252,8 +252,8 @@ const ChartsDisplay: FC<{ activeChart: ChartType; setActiveChart: (chart: ChartT
           <VictoryChart 
             domainPadding={{ x: 30 }} 
             height={400} 
-            width={500} 
-            theme={customTheme}
+            width={500}
+            theme={customTheme as any}
             padding={{ top: 50, bottom: 150, left: 50, right: 50 }}
           >
             <VictoryAxis 
@@ -278,8 +278,8 @@ const ChartsDisplay: FC<{ activeChart: ChartType; setActiveChart: (chart: ChartT
           <h3 className="text-lg font-semibold mb-2">{chartData.title}</h3>
           <VictoryPie 
             data={chartData.data} 
-            innerRadius={80} 
-            theme={customTheme} 
+            innerRadius={80}
+            theme={customTheme as any}
             // Mostra o valor apenas se a fatia for maior que 5% do total
             labels={({ datum, data }) => {
                 const total: number = (data as PieChartData[]).reduce((acc: number, d: PieChartData) => acc + d.y, 0);
@@ -287,8 +287,8 @@ const ChartsDisplay: FC<{ activeChart: ChartType; setActiveChart: (chart: ChartT
             }} 
           />
           <VictoryLegend 
-            data={chartData.data.map((d: PieChartData) => ({ name: d.name }))} 
-            theme={customTheme} 
+            data={chartData.data.map((d: PieChartData) => ({ name: d.name }))}
+            theme={customTheme as any}
           />
         </div>
       )

@@ -1,5 +1,5 @@
-import { Usuario } from '@prisma/client';
-import { sendPushNotification } from '../utils/push';
+import { Usuario, Prisma } from '@prisma/client';
+import { sendPushNotification } from './push.service';
 import { prisma } from '../lib/prisma';
 import Pusher from 'pusher';
 
@@ -11,10 +11,16 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
-export async function getMensagensByCandidatura(candidaturaId: number, usuarioLogado: Usuario): Promise<any[]> {
+type MensagemComRemetente = Prisma.MensagemGetPayload<{
+  include: { remetente: { select: { id: true; nome: true; fotoPerfil: true } } };
+}>;
+
+export async function getMensagensByCandidatura(candidaturaId: number, usuarioLogado: Usuario): Promise<MensagemComRemetente[]> {
   const candidatura = await prisma.candidatura.findUnique({
     where: { id: candidaturaId },
-    include: { vaga: true },
+    include: {
+      vaga: { include: { empresa: { include: { lideres: { take: 1 } } } } },
+    },
   });
 
   if (!candidatura) {
@@ -55,6 +61,21 @@ export async function markAsRead(candidaturaId: number, usuarioId: number): Prom
 export async function enviarMensagem(data: { conteudo: string; destinatarioId: number; candidaturaId: number; remetente: Usuario }) {
   const { conteudo, destinatarioId, candidaturaId, remetente } = data;
 
+  const candidatura = await prisma.candidatura.findUnique({
+    where: { id: candidaturaId },
+    include: { vaga: { include: { empresa: { include: { lideres: true } } } } },
+  });
+
+  if (!candidatura) {
+    const error = new Error('Candidatura não encontrada.');
+    (error as any).statusCode = 404;
+    throw error;
+  }
+
+  const isDestinatarioValido = destinatarioId === candidatura.usuarioId || candidatura.vaga.empresa.lideres.some(l => l.id === destinatarioId);
+  if (!isDestinatarioValido) {
+    throw new Error('Destinatário inválido para esta candidatura.');
+  }
   const novaMensagem = await prisma.mensagem.create({
     data: {
       conteudo,
@@ -76,7 +97,7 @@ export async function enviarMensagem(data: { conteudo: string; destinatarioId: n
       title: `Nova mensagem de ${remetente.nome}`,
       body: novaMensagem.conteudo,
       icon: remetente.fotoPerfil || '/icon.png',
-      data: { url: `/minhasCandidaturas?candidaturaId=${candidaturaId}` },
+      data: { url: `/candidaturas?candidaturaId=${candidaturaId}` },
     });
     destinatarioSubscriptions.forEach(sub => sendPushNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload));
   }

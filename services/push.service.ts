@@ -1,6 +1,25 @@
 import { prisma } from '../lib/prisma';
+import webpush from 'web-push';
 
-export async function saveSubscription(subscription: any, usuarioId: number) {
+interface SubscriptionJSON {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    'mailto:admin@example.com',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
+
+export const sendPushNotification = (subscription: SubscriptionJSON, payload: string) => webpush.sendNotification(subscription, payload);
+
+export async function saveSubscription(subscription: SubscriptionJSON, usuarioId: number) {
   try {
     await prisma.pushSubscription.create({
       data: {

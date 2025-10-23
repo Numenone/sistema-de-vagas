@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as pushService from '../services/push.service';
-import { isPushAvailable } from '../push';
+import { isPushAvailable } from '../src/utils/push';
 
 export function getVapidKey(req: Request, res: Response) {
   if (!isPushAvailable()) {

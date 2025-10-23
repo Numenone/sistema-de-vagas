@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useUsuarioStore } from './context/UsuarioContext';
-import type { CandidaturaType } from './utils/CandidaturaType';
+import { type CandidaturaType, STATUS_CANDIDATURA, type StatusCandidatura, statusStyles } from './utils/CandidaturaType';
 import { Search, Filter } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import ChatModal from './component/ChatModal'; // Importar o modal
 
 const apiUrl = import.meta.env.VITE_API_URL;
-
-const STATUS_CANDIDATURA = ['Enviada', 'Em Análise', 'Aprovada', 'Rejeitada'] as const;
-type StatusCandidatura = typeof STATUS_CANDIDATURA[number];
-
-const statusStyles: Record<StatusCandidatura, string> = {
-  Enviada: 'bg-blue-100 text-blue-800 border-blue-200',
-  'Em Análise': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  Aprovada: 'bg-green-100 text-green-800 border-green-200',
-  Rejeitada: 'bg-red-100 text-red-800 border-red-200',
-};
 
 export default function CandidaturasEmpresa() {
   const [candidaturas, setCandidaturas] = useState<CandidaturaType[]>([]);
@@ -122,7 +112,6 @@ export default function CandidaturasEmpresa() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vaga</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">

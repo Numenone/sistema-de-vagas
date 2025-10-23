@@ -1,9 +1,12 @@
+import { UsuarioType } from "./UsuarioType";
+
 export type EmpresaType = {
     id: number;
     nome: string;
     descricao: string;
-    logo: string | null;
+    logo?: string | null;
     ativo: boolean;
     createdAt: string;
     updatedAt: string;
+    lideres?: Partial<UsuarioType>[];
 };

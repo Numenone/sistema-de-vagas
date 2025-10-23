@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.ts';
+import { prisma } from '../lib/prisma';
 import { Vaga, Prisma } from '@prisma/client';
 
 export const getAll = async (query: any): Promise<Vaga[]> => {

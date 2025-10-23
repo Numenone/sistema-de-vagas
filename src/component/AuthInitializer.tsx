@@ -4,13 +4,12 @@ import { useUsuarioStore } from '../context/UsuarioContext'
 import { subscribeToPush } from '../utils/push'; // This path is now correct
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
-
 export default function AuthInitializer() {
   const { carregarUsuarioSalvo, usuario, fetchAutenticado } = useUsuarioStore();
 
   // This hook from vite-plugin-pwa handles the service worker registration and updates.
   useRegisterSW({
-    onRegistered(r) {
+    onRegistered(_r) {
       console.log('Service Worker registered.');
     },
     onNeedRefresh() {
