@@ -9,8 +9,26 @@ import { errorHandler } from './middlewares/errorHandler.js';
 const __dirname = path.resolve();
 const app = express();
 
-app.options('*', cors()) // enable pre-flight request for all routes
-app.use(cors({ origin: '*' }));
+// --- Configuração de CORS ---
+// Lista de domínios permitidos a fazer requisições para a API.
+const allowedOrigins = [
+  'https://sistema-de-vagas-5hgrd9jei-numenones-projects.vercel.app', // Sua URL de produção do frontend
+  process.env.FRONTEND_URL, // URL do frontend em desenvolvimento (ex: http://localhost:5173)
+];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Permite requisições da lista de permitidos e requisições sem 'origin' (como Postman ou apps mobile)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+};
+
+// Habilita o CORS com as opções configuradas para todas as rotas.
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
