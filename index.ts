@@ -1,10 +1,12 @@
 import 'dotenv/config';
+import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import 'express-async-errors';
 import routes from './routes/index';
 import { errorHandler } from './middlewares/errorHandler';
+import { initializeWebSocket } from './routes/websocket';
 
 const __dirname = path.resolve();
 const app = express();
@@ -27,5 +29,14 @@ app.get('*', (req, res) => {
 // Global error handler middleware (must be last)
 app.use(errorHandler);
 
-// Export the app for Vercel's serverless environment
-export default app;
+const port = process.env.PORT || 3001;
+
+const server = http.createServer(app);
+
+initializeWebSocket(server);
+
+server.listen(port, () => {
+  console.log(`🚀 Servidor rodando na porta: ${port}`);
+});
+
+export default app; // Mantém a exportação para a Vercel

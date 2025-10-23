@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { sendPasswordResetEmail } from './email.service';
+import * as usuarioService from './usuario.service';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'SEU_SEGREDO_SUPER_SECRETO';
 
@@ -37,15 +38,10 @@ export async function login(email: string, senha: string): Promise<{ usuario: Pa
 }
 
 export async function createUsuario(data: Prisma.UsuarioCreateInput): Promise<Partial<Usuario>> {
-  const salt = await bcrypt.genSalt(10);
-  const senhaHash = await bcrypt.hash(data.senha, salt);
-
-  const novoUsuario = await prisma.usuario.create({
-    data: {
-      ...data,
-      email: data.email.toLowerCase(),
-      senha: senhaHash,
-    },
+  // Reutiliza o serviço de usuário que já faz o hash da senha
+  const novoUsuario = await usuarioService.create({
+    ...data,
+    email: data.email.toLowerCase(),
   });
 
   const { senha: _, ...usuarioSemSenha } = novoUsuario;

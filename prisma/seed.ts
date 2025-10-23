@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import path from 'path';
+import * as usuarioService from '../services/usuario.service';
 
 const prisma = new PrismaClient();
 
@@ -36,14 +36,7 @@ async function main() {
   // 2. Usuários (com hash de senha)
   for (const usuario of dbData.usuarios) {
     const { id: _id, senha, ...data } = usuario;
-    const salt = await bcrypt.genSalt(10);
-    const senhaHash = await bcrypt.hash(senha, salt);
-    await prisma.usuario.create({
-      data: {
-        ...data,
-        senha: senhaHash,
-      },
-    });
+    await usuarioService.create({ ...data, senha });
   }
   console.log('Usuários inseridos.');
 
