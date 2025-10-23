@@ -11,8 +11,11 @@
       "config": { "distDir": "dist" }
     }
   ],
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/index.ts" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "index.ts" },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
