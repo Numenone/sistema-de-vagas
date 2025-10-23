@@ -21,13 +21,4 @@ export default defineConfig({
       },
     }),
   ],
-  server: {
-    proxy: {
-      // Redireciona requisições de API para o backend
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      }
-    },
-  },
 })

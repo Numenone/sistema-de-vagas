@@ -1,12 +1,12 @@
 import { prisma } from '../lib/prisma';
-import { Usuario, Prisma } from '@prisma/client';
+import { Usuario, Prisma, UserType } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 export const getAll = async (query: any): Promise<Usuario[]> => {
   const { email, tipo } = query;
   const where: Prisma.UsuarioWhereInput = {};
   if (email) where.email = email as string;
-  if (tipo) where.tipo = tipo as string;
+  if (tipo) where.tipo = tipo as UserType;
   return prisma.usuario.findMany({ where });
 };
 
