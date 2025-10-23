@@ -41,6 +41,11 @@ export async function sendPasswordResetEmail(to: string, token: string) {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
-  console.log(`E-mail de redefinição de senha enviado para ${to}. URL de preview: ${nodemailer.getTestMessageUrl(await transporter.sendMail(mailOptions))}`);
+  // Envia o e-mail apenas UMA VEZ e armazena o resultado
+  const info = await transporter.sendMail(mailOptions);
+
+  // Usa o resultado do envio para obter a URL de preview (se aplicável)
+  const previewUrl = nodemailer.getTestMessageUrl(info);
+
+  console.log(`E-mail de redefinição de senha enviado para ${to}. ${previewUrl ? `URL de preview: ${previewUrl}` : ''}`);
 }

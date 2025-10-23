@@ -73,7 +73,7 @@ export async function forgotPassword(email: string): Promise<void> {
 
   const resetToken = crypto.randomBytes(20).toString('hex');
   const passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-  const passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+  const passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 60 minutos (1 hora)
 
   await prisma.usuario.update({
     where: { id: usuario.id },
