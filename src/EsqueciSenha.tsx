@@ -14,7 +14,7 @@ export default function EsqueciSenha() {
 
   async function onSubmit(data: Inputs) {
     try {
-      const response = await fetch(`${apiUrl}/api/forgot-password`, {
+      const response = await fetch(`${apiUrl}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
