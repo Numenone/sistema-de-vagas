@@ -63,6 +63,10 @@ export async function update(id: number, data: { nome?: string; descricao?: stri
   return prisma.empresa.update({ where: { id }, data });
 }
 
+export async function create(data: { nome: string; descricao: string; logo?: string }) {
+  return prisma.empresa.create({ data });
+}
+
 export async function remove(id: number) {
   // Em vez de deletar, vamos desativar a empresa e suas vagas.
   return updateStatus(id, false);

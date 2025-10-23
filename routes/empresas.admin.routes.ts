@@ -5,6 +5,8 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
 import * as adminEmpresasController from '../controllers/empresas.admin.controller.js';
+import { validate } from '../middlewares/validate.js';
+import { createEmpresaSchema } from '../schemas/empresa.schema.js';
 
 const router = Router();
 
@@ -22,6 +24,9 @@ const upload = multer({ storage });
 
 // --- GET /api/admin/empresas (Admin lista todas as empresas) ---
 router.get('/', authenticateToken, isAdmin, adminEmpresasController.getEmpresas);
+
+// --- POST /api/admin/empresas (Admin cria uma nova empresa) ---
+router.post('/', authenticateToken, isAdmin, upload.single('logo'), validate(createEmpresaSchema), adminEmpresasController.createEmpresa);
 
 // --- GET /api/admin/empresas/:id/lideres (Admin lista os líderes de uma empresa) ---
 router.get('/:id/lideres', authenticateToken, isAdmin, adminEmpresasController.getLideresByEmpresa);

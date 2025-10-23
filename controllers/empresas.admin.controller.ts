@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as adminEmpresasService from '../services/empresas.admin.service.js';
+import { createEmpresaSchema } from '../schemas/empresa.schema.js';
 
 export async function getEmpresas(req: Request, res: Response) {
   const { search } = req.query;
@@ -27,6 +28,18 @@ export async function updateEmpresa(req: Request, res: Response) {
   });
 
   res.json(empresaAtualizada);
+}
+
+export async function createEmpresa(req: Request, res: Response) {
+  const { nome, descricao } = req.body;
+  const logo = req.file?.path;
+
+  const novaEmpresa = await adminEmpresasService.create({
+    nome,
+    descricao,
+    logo,
+  });
+  res.status(201).json(novaEmpresa);
 }
 
 export const deleteEmpresa = async (req: Request, res: Response) => {

@@ -26,8 +26,8 @@ routes.use('/habilidades', habilidadesRouter);
 routes.use('/candidaturas', candidaturasRouter);
 routes.use('/favoritos', favoritosRouter);
 routes.use('/atividades', atividadesRouter);
-routes.use('/admin/dashboard-stats', dashboardRouter);
-routes.use('/admin/empresas', adminEmpresasRouter); // Rota mais específica primeiro
+routes.use('/admin/empresas', adminEmpresasRouter); // Agora lida com GET e POST
+routes.use('/admin/dashboard-stats', dashboardRouter); // Movido para consistência
 routes.use('/admin', adminRouter); // Rota mais genérica depois
 routes.use('/mensagens', mensagensRouter);
 routes.use('/push', pushRouter);
